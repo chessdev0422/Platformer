@@ -16,11 +16,14 @@ function scr_get_controls()
 	
 	//Directional Inputs
 	rightKey = keyboard_check(vk_right) + sign(gamepad_axis_value(0, gp_axisrh));
-	clamp(rightKey, -1, 1);
+	clamp(rightKey, 0, 1);
 	
 	
 	leftKey = keyboard_check(vk_left)  + sign(gamepad_axis_value(0, gp_axislh));
-	clamp(leftKey, -1, 1);
+	clamp(leftKey, 0, 1);
+	
+	downKey = keyboard_check_pressed(vk_down) + sign(gamepad_axis_value(0, gp_axisrv));
+	clamp(downKey, 0, 1);
 	
 	
 	

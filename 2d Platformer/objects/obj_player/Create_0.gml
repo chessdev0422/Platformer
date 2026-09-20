@@ -1,16 +1,47 @@
 image_xscale = 0.25;
 image_yscale = 0.25;
+depth = -30;
 
 //controls setup
 scr_controls_setup();
 
-//moving
+function check_for_semisolid_platform(_x, _y)
+{
+	//Create a return variable
+	var _rtrn = noone;
+	
+	//We must not be moving upwards, and then we check for a normal collision
+	if yspd >= 0 && place_meeting(_x, _y, obj_semi_solid_wall)
+	{
+		//Create a ds list to store all colliding instances of obj_semi_solid_wall
+		var _list = ds_list_create();
+		var _listSize = instance_place_list(_x, _y, obj_semi_solid_wall, _list, false);
+		
+		//Loop through the colliding instances and only return one if it's top is below the player
+		for( var i = 0; i < _listSize; i++ )
+		{
+			var _listInst = _list[| i];
+			if floor(bbox_bottom) <= ceil( _listInst.bbox_top - _listInst.yspd )
+			{
+				_rtrn = _listInst;
+				
+				//exit the loop early
+				i = _listSize;
+			}
+		}
+	}
+	
+	//Return our variable
+	return _rtrn;
+}
 
+
+//moving
 face = 0; //-1 = left, 0 = not moving, 1 = right
 
 moveType = 0;
 moveSpd[0] = 7;//speed player moves at when walking
-moveSpd[1] = 15;//speed player moves at when running
+moveSpd[1] = 11;//speed player moves at when running
 
 xspd = 0; //current speed on x and y values
 yspd = 0;
@@ -19,6 +50,7 @@ yspd = 0;
 grav = 1.25; //gravity
 
 terminal_vel = 20; //cap the max falling speed
+
 
 jumpSpd = -15; //speed player jumps at
 
@@ -48,3 +80,13 @@ draw_face = 1;
 idleSpr = spr_player_idle;
 walkSpr = spr_player_walk;
 jumpSpr = spr_player_jump;
+*/
+
+
+
+//Moving platforms-------------/
+currentFloor = noone;//the floor we are standing on
+moveWallxspd = 0;//the speed of the wall we are standing on
+forgetSemiSolidWall = noone;
+
+earlyMoveWallxspd = false;

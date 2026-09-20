@@ -1,17 +1,21 @@
 {
   "$GMObject":"",
-  "%Name":"obj_wall",
+  "%Name":"obj_semi_solid_moving_wall",
   "eventList":[
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":1,"eventType":3,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
-  "name":"obj_wall",
+  "name":"obj_semi_solid_moving_wall",
   "overriddenProperties":[],
   "parent":{
     "name":"Walls",
     "path":"folders/Walls.yy",
   },
-  "parentObjectId":null,
+  "parentObjectId":{
+    "name":"obj_semi_solid_wall",
+    "path":"objects/obj_semi_solid_wall/obj_semi_solid_wall.yy",
+  },
   "persistent":false,
   "physicsAngularDamping":0.1,
   "physicsDensity":0.5,
@@ -30,8 +34,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spr_wall",
-    "path":"sprites/spr_wall/spr_wall.yy",
+    "name":"spr_semi_solid_move_wall",
+    "path":"sprites/spr_semi_solid_move_wall/spr_semi_solid_move_wall.yy",
   },
   "spriteMaskId":null,
   "visible":true,

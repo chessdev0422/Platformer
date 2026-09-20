@@ -1,11 +1,11 @@
 {
   "$GMObject":"",
-  "%Name":"obj_wall",
+  "%Name":"obj_semi_solid_wall",
   "eventList":[
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
-  "name":"obj_wall",
+  "name":"obj_semi_solid_wall",
   "overriddenProperties":[],
   "parent":{
     "name":"Walls",
@@ -30,8 +30,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spr_wall",
-    "path":"sprites/spr_wall/spr_wall.yy",
+    "name":"spr_semi_solid_wall",
+    "path":"sprites/spr_semi_solid_wall/spr_semi_solid_wall.yy",
   },
   "spriteMaskId":null,
   "visible":true,
