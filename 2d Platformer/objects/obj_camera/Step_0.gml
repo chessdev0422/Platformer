@@ -4,7 +4,7 @@ var _camWidth = camera_get_view_width(view_camera[0]);
 var _camHeight = camera_get_view_height(view_camera[0]);
 
 xTo = follow.x - _camWidth/2;
-yTo = follow.y - _camHeight/2;
+yTo = follow.y - _camHeight/2 - sprite_get_height(spr_player_mask)/2;
 
 //smoothly lerp
 x += (xTo - x) / 15;

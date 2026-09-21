@@ -112,6 +112,12 @@ if instance_exists(currentFloor) && currentFloor.xspd != 0 && !place_meeting(x, 
 }
 
 
+//Crouching---------/
+	//transition to crouch
+	//manual
+	
+
+
 //X movement
 
 	//direction
@@ -454,7 +460,7 @@ if instance_exists(forgetSemiSolidWall) && !place_meeting(x, y, forgetSemiSolidW
 		
 		//also don't check too far, we don't want to warp below walls
 		
-		var _maxPushDist = 25;//the farthest a moving platform should be able to push the player downwards
+		var _maxPushDist = 10;//the farthest a moving platform should be able to push the player downwards
 		var _pushedDist = 0;
 		var _start_y = y; //a reference point
 		
@@ -478,9 +484,9 @@ if instance_exists(forgetSemiSolidWall) && !place_meeting(x, y, forgetSemiSolidW
 
 
 //sprite control------------/
-/*
+
 //walking
-if abs(xspd) > 0 {sprite_index = walkSpr;};
+if abs(xspd) > 0 {sprite_index = walkSpr[moveType];};
 
 //idle
 if xspd == 0 {sprite_index = idleSpr;};
@@ -488,4 +494,7 @@ if xspd == 0 {sprite_index = idleSpr;};
 //in the air
 if !onGround {sprite_index = jumpSpr;};
 
-mask_index = maskSpr;
+//attacking
+
+
+mask_index = maskSpr[crouching];

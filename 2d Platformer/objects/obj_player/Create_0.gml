@@ -1,5 +1,3 @@
-image_xscale = 0.25;
-image_yscale = 0.25;
 depth = -30;
 
 //controls setup
@@ -40,19 +38,19 @@ function check_for_semisolid_platform(_x, _y)
 face = 0; //-1 = left, 0 = not moving, 1 = right
 
 moveType = 0;
-moveSpd[0] = 7;//speed player moves at when walking
-moveSpd[1] = 11;//speed player moves at when running
+moveSpd[0] = 3;//speed player moves at when walking
+moveSpd[1] = 5;//speed player moves at when running
 
 xspd = 0; //current speed on x and y values
 yspd = 0;
 
 //jumping---------------/
-grav = 1.25; //gravity
+grav = 0.35; //gravity
 
-terminal_vel = 20; //cap the max falling speed
+terminal_vel = 5.5; //cap the max falling speed
 
 
-jumpSpd = -15; //speed player jumps at
+jumpSpd = -5.75; //speed player jumps at
 
 maxJump = 2;//the max amount of jumps the player has, defaulted to 1, 2 = double jump, 3 = triple jump, etc
 jumpCount = 0;//the current index of jump we are on, 1 = already used first jump
@@ -76,13 +74,17 @@ coyoteJumpTimer = 0;
 
 //sprite control-----------/
 draw_face = 1;
-/*maskSpr = spr_player_mask;
+maskSpr[0] = spr_player_mask;
+maskSpr[1] = spr_player_mask_crouching;
 idleSpr = spr_player_idle;
-walkSpr = spr_player_walk;
-jumpSpr = spr_player_jump;
-*/
+walkSpr[0] = spr_player_walking;
+walkSpr[1] = spr_player_running; 
+jumpSpr = spr_player_jumping;
+attackSpr = spr_player_attacking;
+crouchSpr = spr_player_crouching;
 
-
+//state variables
+crouching = false;
 
 //Moving platforms-------------/
 currentFloor = noone;//the floor we are standing on
