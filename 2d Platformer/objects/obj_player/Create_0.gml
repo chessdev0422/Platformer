@@ -47,10 +47,13 @@ yspd = 0;
 //jumping---------------/
 grav = 0.35; //gravity
 
-terminal_vel = 5.5; //cap the max falling speed
+terminal_vel[0] = 8; //cap the max falling speed
+terminal_vel[1] = 2;//the slide speed when touching a wall
 
 
-jumpSpd = -5.75; //speed player jumps at
+jumpSpd[0] = -7; //speed player jumps at
+jumpSpd[1] = -12//when bouncing
+#macro BOUNCING 1
 
 maxJump = 2;//the max amount of jumps the player has, defaulted to 1, 2 = double jump, 3 = triple jump, etc
 jumpCount = 0;//the current index of jump we are on, 1 = already used first jump
@@ -61,6 +64,10 @@ jumpHoldFrames[1] = 10;//an array for each jumpCount of course
 
 onGround = true;//whether or not the player has solid ground directly beneath them
 
+
+wallSliding = false;
+wallJumpTimer = 0;
+wallJumpTimerFrames = 20;//number of frames moving is locked out when wall jumping
 
 //coyote time --------/
 //hang frames
@@ -74,14 +81,15 @@ coyoteJumpTimer = 0;
 
 //sprite control-----------/
 draw_face = 1;
-maskSpr[0] = spr_player_mask;
-maskSpr[1] = spr_player_mask_crouching;
-idleSpr = spr_player_idle;
-walkSpr[0] = spr_player_walking;
-walkSpr[1] = spr_player_running; 
-jumpSpr = spr_player_jumping;
-attackSpr = spr_player_attacking;
-crouchSpr = spr_player_crouching;
+maskSpr = spr_player;
+crouchMaskSpr = spr_player;
+idleSpr = spr_player;
+walkSpr[0] = spr_player;
+walkSpr[1] = spr_player; 
+jumpSpr = spr_player;
+attackSpr = spr_player;
+crouchSpr = spr_player;
+slideSpr = spr_player;
 
 //state variables
 crouching = false;

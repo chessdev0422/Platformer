@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_pathfinding",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_pathfinding",
+  "parent":{
+    "name":"Enemies",
+    "path":"folders/Enemies.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

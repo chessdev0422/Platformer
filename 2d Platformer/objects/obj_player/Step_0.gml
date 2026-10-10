@@ -1,5 +1,12 @@
 scr_get_controls();
 
+
+//------------wall jump and slide checks-------/
+var _wallCheckLeft = place_meeting(x - 1, y, obj_wall);
+var _wallCheckRight = place_meeting(x + 1, y, obj_wall);
+var _touchingWall = (_wallCheckLeft || _wallCheckRight) && !onGround;
+
+
 //get "unstuck" from walls that have moved into the player in the begin step
 
 //check from each direction
@@ -101,7 +108,7 @@ ds_list_destroy(_list);
 
 //don't get left behind by the wall
 earlyMoveWallxspd = false;
-if instance_exists(currentFloor) && currentFloor.xspd != 0 && !place_meeting(x, y+1 + terminal_vel, currentFloor)
+if instance_exists(currentFloor) && currentFloor.xspd != 0 && !place_meeting(x, y+1 + terminal_vel[_touchingWall], currentFloor)
 {
 	//go ahead and move back onto the platform if not a wall in the way
 	if !place_meeting(x + currentFloor.xspd, y, obj_wall)
@@ -114,12 +121,41 @@ if instance_exists(currentFloor) && currentFloor.xspd != 0 && !place_meeting(x, 
 
 //Crouching---------/
 	//transition to crouch
-	//manual
+	if onGround && (downKey || place_meeting(x, y, obj_wall))
+	{
+		crouching = true;
+	}
 	
+	if crouching {mask_index = crouchMaskSpr;};
+	
+	//uncrouch
+	if crouching && !downKey
+	{
+		//check if can un-crouch
+		mask_index = maskSpr;
+		
+		//uncrouch if not a wall
+		if !place_meeting(x, y, obj_wall)
+		{
+			crouching = false;
+		} else {
+			//otherwise go back to crouching
+			mask_index = crouchMaskSpr;
+		}
+	}
 
 
 //X movement
-
+if wallJumpTimer > 0
+{
+	wallJumpTimer--;
+} else if crouching {
+	xspd = 0;
+	if onGround
+	{
+		yspd = 0;
+	}
+} else {
 	//direction
 	face = rightKey - leftKey;
 	
@@ -132,7 +168,7 @@ if instance_exists(currentFloor) && currentFloor.xspd != 0 && !place_meeting(x, 
 	xspd = face * moveSpd[moveType];
 	
 	if face != 0 {draw_face = face;};
-	
+}
 	//X collision ----- /
 	
 	//scoot right up to the wall
@@ -148,8 +184,8 @@ if instance_exists(currentFloor) && currentFloor.xspd != 0 && !place_meeting(x, 
 		}
 		
 		xspd = 0; //set xspd to 0 to "collide"
+		wallJumpTimer = 0;//reset the wall jump timer so we stop ignoring the x movement
 	}
-
 //move the player in the x
 x += xspd;	
 
@@ -167,7 +203,7 @@ x += xspd;
 	}
 	
 	//cap the yspd based on the terminal vel
-	if yspd > terminal_vel {yspd = terminal_vel};
+	if yspd > terminal_vel[_touchingWall] {yspd = terminal_vel[_touchingWall]};
 	
 	//reset jump vars
 	if onGround 
@@ -193,36 +229,84 @@ x += xspd;
 	
 	
 	//jumping-------------/
-	if jumpKeyBuffered && jumpCount < maxJump
-	{
-		yspd = jumpSpd;//set the player jumping
-		
-		jumpKeyBuffered = false;//reset
-		jumpKeyBufferTimer = 0;
-		
-		jumpCount++;//increase the number of jumps
-		
-		jumpHoldTimer = jumpHoldFrames[jumpCount-1];//start the timer for how long the jump button has been held
-		
-		onGround = false; //reset everything when jumping
-		coyoteHangTimer = 0;
-		coyoteJumpTimer = 0;
-		currentFloor = noone;//VERY important to reset or wont be able to jump
-	}
 	
-	//cut off the jump when the button is released
-	if !jumpKeyHeld
-	{
-		jumpHoldTimer = 0;
-	}
+		//on ground
+		if jumpKeyBuffered && jumpCount < maxJump && !_touchingWall && !crouching
+		{
+			yspd = jumpSpd[0];//set the player jumping
+		
+			jumpKeyBuffered = false;//reset
+			jumpKeyBufferTimer = 0;
+		
+			jumpCount++;//increase the number of jumps
+		
+			jumpHoldTimer = jumpHoldFrames[jumpCount-1];//start the timer for how long the jump button has been held
+		
+			onGround = false; //reset everything when jumping
+			coyoteHangTimer = 0;
+			coyoteJumpTimer = 0;
+			currentFloor = noone;//VERY important to reset or wont be able to jump
+		}
+		
+		//wall jumps
+		if jumpKeyBuffered && !onGround && _touchingWall
+		{
+		    //determine which direction to push based on the wall you are touching
+		    var _dir = 0;
+		    if _wallCheckLeft  { _dir = 1; } //jump off left wall
+		    if _wallCheckRight { _dir = -1; } //jump off right wall
+    
+			face = _dir;
+			draw_face = _dir;
 	
-	if jumpHoldTimer > 0
-	{
-		//constantly set the yspd to be the jumping speed
-		yspd = jumpSpd;
-		//count down the timer
-		jumpHoldTimer--;
-	}  
+		    //apply speeds
+		    xspd = face * 6;       //xspd
+		    yspd = -5;             //yspd
+    
+		    //reset jump variables
+		    jumpKeyBuffered = false;
+		    jumpKeyBufferTimer = 0;
+		    jumpHoldTimer = jumpHoldFrames[0];
+    
+		    coyoteHangTimer = 0;
+		    coyoteJumpTimer = 0;
+		    currentFloor = noone;
+			
+			//set the wall jump timer
+			wallJumpTimer = wallJumpTimerFrames;
+		}
+		
+		//bouncy pads
+		if instance_exists(currentFloor) && (currentFloor.object_index == obj_bouncy_pad || object_is_ancestor(currentFloor.object_index, obj_bouncy_pad))
+		{
+			yspd = jumpSpd[BOUNCING];
+		
+			jumpKeyBuffered = false;//reset
+			jumpKeyBufferTimer = 0;
+		
+			jumpCount++;//increase the number of jumps
+		
+			jumpHoldTimer = jumpHoldFrames[jumpCount-1];//start the timer for how long the jump button has been held
+		
+			onGround = false; //reset everything when jumping
+			coyoteHangTimer = 0;
+			coyoteJumpTimer = 0;
+			currentFloor = noone;//VERY important to reset or wont be able to jump
+		}
+			
+			//cut off the jump when the button is released
+			if !jumpKeyHeld
+			{
+				jumpHoldTimer = 0;
+			}
+	
+			if jumpHoldTimer > 0
+			{
+				//constantly set the yspd to be the jumping speed
+				yspd = jumpSpd[0];
+				//count down the timer
+				jumpHoldTimer--;
+			}  
 	
 	
 	//Y collision-----------/
@@ -262,7 +346,7 @@ x += xspd;
 		array_push(_array, obj_wall, obj_semi_solid_wall);
 	
 	
-		var _listSize = instance_place_list(x, y+1 + _clamp_yspd + terminal_vel, _array, _list, false);
+		var _listSize = instance_place_list(x, y+1 + _clamp_yspd + terminal_vel[_touchingWall], _array, _list, false);
 	
 		
 		var _ycheck = y + 1 + _clamp_yspd;
@@ -302,7 +386,7 @@ x += xspd;
 		ds_list_destroy(_list);
 
 		//one last check to make sure the current floor is still below us
-		if instance_exists(currentFloor) && !place_meeting(x, y+terminal_vel, currentFloor)
+		if instance_exists(currentFloor) && !place_meeting(x, y+terminal_vel[_touchingWall], currentFloor)
 		{
 			currentFloor = noone;
 		}
@@ -419,7 +503,7 @@ if instance_exists(forgetSemiSolidWall) && !place_meeting(x, y, forgetSemiSolidW
 	{
 		//snap to the top of the floor platform
 		if !place_meeting(x, currentFloor.bbox_top, obj_wall)
-		&& currentFloor.bbox_top >= bbox_bottom - terminal_vel 
+		&& currentFloor.bbox_top >= bbox_bottom - terminal_vel[_touchingWall] 
 		{
 			y = currentFloor.bbox_top; //unfloor y so its not choppy;		
 		}
@@ -494,7 +578,9 @@ if xspd == 0 {sprite_index = idleSpr;};
 //in the air
 if !onGround {sprite_index = jumpSpr;};
 
+if _touchingWall {sprite_index = slideSpr}
+
+//crouching
+if crouching = true {sprite_index = crouchSpr;};
+
 //attacking
-
-
-mask_index = maskSpr[crouching];

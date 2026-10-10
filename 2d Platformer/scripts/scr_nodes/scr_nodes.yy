@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_nodes",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_nodes",
+  "parent":{
+    "name":"Enemies",
+    "path":"folders/Enemies.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

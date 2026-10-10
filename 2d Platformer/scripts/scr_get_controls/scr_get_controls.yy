@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"scr_get_controls",
   "parent":{
-    "name":"2d Platformer",
-    "path":"2d Platformer.yyp",
+    "name":"Player",
+    "path":"folders/Player.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",
