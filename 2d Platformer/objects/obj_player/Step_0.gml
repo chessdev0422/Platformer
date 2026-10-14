@@ -4,8 +4,8 @@ scr_get_controls();
 
 
 //------------wall jump and slide checks-------/
-var _wallCheckLeft = place_meeting(x - 1, y, obj_wall);
-var _wallCheckRight = place_meeting(x + 1, y, obj_wall);
+var _wallCheckLeft = place_meeting(x - 1, y, obj_wall) && leftKey;
+var _wallCheckRight = place_meeting(x + 1, y, obj_wall) && rightKey;
 var _touchingWall = (_wallCheckLeft || _wallCheckRight) && !onGround;
 
 
@@ -262,8 +262,8 @@ x += xspd;
 			draw_face = _dir;
 	
 		    //apply speeds
-		    xspd = face * 7;       //xspd
-		    yspd = -2.5;             //yspd
+		    xspd = face * 10;       //xspd
+		    yspd = -3;             //yspd
     
 		    //reset jump variables
 		    jumpKeyBuffered = false;
