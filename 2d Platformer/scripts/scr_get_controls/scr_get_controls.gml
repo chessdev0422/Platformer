@@ -37,6 +37,11 @@ function scr_get_controls()
 	
 	runKey = keyboard_check(vk_shift) || gamepad_button_check(0, gp_face3);
 	
+	
+	//UI inputs
+	mapKey = keyboard_check_pressed(ord("M"));
+	
+	
 	if object_index == obj_player
 	{
 		//jump key buffering

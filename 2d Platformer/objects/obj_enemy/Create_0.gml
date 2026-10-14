@@ -41,7 +41,7 @@ airDir = 0;
 
 
 moveType = 0;
-moveSpd = 3;//speed enemy moves at when walking
+moveSpd = 4;//speed enemy moves at when walking
 
 xspd = 0; //current speed on x and y values
 yspd = 0;
@@ -87,6 +87,7 @@ attackSpr = spr_enemy;
 
 //state variables
 crouching = false;
+canFallThroughPlat = false;
 
 //moving platforms-------------/
 currentFloor = noone;//the floor we are standing on
@@ -95,4 +96,7 @@ forgetSemiSolidWall = noone;
 
 earlyMoveWallxspd = false;
 
-path_to_follow = [];
+path_to_follow = []; //the movement path to follow
+
+temp_nearest_x = 0; //a temporary nearest x and y when off the ground to avoid weird scenarios with finding the nearest node
+temp_nearest_y = 0;

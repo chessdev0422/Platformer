@@ -1,3 +1,5 @@
+if global.paused exit;
+
 //move 
 dir += rotationSpd;
 

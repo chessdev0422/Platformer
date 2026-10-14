@@ -1,3 +1,11 @@
+function get_wall_instance_below(_node) {
+    var _inst = instance_position(_node.x, _node.y + 16, obj_wall);
+    if (_inst == noone) _inst = instance_position(_node.x, _node.y + 16, obj_semi_solid_wall);
+    if (_inst == noone) _inst = instance_position(_node.x, _node.y + 16, obj_moving_wall);
+    if (_inst == noone) _inst = instance_position(_node.x, _node.y + 16, obj_semi_solid_moving_wall);
+    return _inst;
+}
+
 function a_star_find_path(_start_node, _goal_node) {
 
 	if (_start_node == noone || _goal_node == noone) { return [];}
@@ -44,13 +52,14 @@ function a_star_find_path(_start_node, _goal_node) {
 		        array_push(_path, _temp);
 		        _temp = _temp.parent;
 		    }
-		    array_reverse(_path);
+		   
+			array_reverse(_path);
 			
 			var _visited_count = 0;
-		for (var i = 0; i < array_length(global.nodes); i++) {
-			if (global.nodes[i].closed) _visited_count++;
-		}
-		//show_debug_message("PATH SUCCESS. Visited " + string(_visited_count) + " out of " + string(array_length(global.nodes)) + " total nodes.");
+			for (var i = 0; i < array_length(global.nodes); i++) {
+				if (global.nodes[i].closed) _visited_count++;
+			}
+			//show_debug_message("PATH SUCCESS. Visited " + string(_visited_count) + " out of " + string(array_length(global.nodes)) + " total nodes.");
 			
 		    return _path;
 		}
@@ -71,8 +80,8 @@ function a_star_find_path(_start_node, _goal_node) {
 		    //height check for jumps
 		    var _vert_rise = _current_node.y - _neighbor.y;//the vertical distance between nodes
 			var _horiz_dist = _current_node.y - _neighbor.y;//the horizontal distance between nodes
-		    var _max_allowed_rise = 32 * 4.5;//max allowed rise for a jump
-			var _max_allowed_dist = 32 * 5.5;//max allowed distance for a gao
+		    var _max_allowed_rise = 32 * 5.5;//max allowed rise for a jump
+			var _max_allowed_dist = 32 * 6.5;//max allowed distance for a gap
 			var _jump_val = 0;
 			var _gap_val = 0;
 		    if (_link.action == "jump" && _vert_rise > _max_allowed_rise) {
@@ -116,20 +125,25 @@ function a_star_find_path(_start_node, _goal_node) {
 	return []; 
 }
 
-function get_nearest_node(_x, _y) {
-    var _closestNode = noone;
+function get_nearest_node(_x, _y, _skip = false) {
+    var _nearestNode = noone;
     var _minDist = infinity;
     
     var _nodeCount = array_length(global.nodes);
     for (var i = 0; i < _nodeCount; i++) {
         var _node = global.nodes[i];
-        var _dist = point_distance(_x, _y, _node.x, _node.y);//find the nearest x and y
         
-        if (_dist < _minDist) {//compare
+        //skip floating air nodes
+        if (_skip && (_node.type == "air" || !get_wall_instance_below(_node))) {
+            continue;
+        }
+        
+        var _dist = point_distance(_x, _y, _node.x, _node.y);
+        if (_dist < _minDist) {
             _minDist = _dist;
-            _closestNode = _node;
+            _nearestNode = _node;
         }
     }
     
-    return _closestNode;//return the closest
+    return _nearestNode;
 }

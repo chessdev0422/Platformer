@@ -1,9 +1,22 @@
+//get current camera settings for view culling
+var _cam_x = camera_get_view_x(view_camera[0]);
+var _cam_y = camera_get_view_y(view_camera[0]);
+var _cam_w = camera_get_view_width(view_camera[0]);
+var _cam_h = camera_get_view_height(view_camera[0]);
+var _pad = 32; //padding
+
 var _nodeCount = array_length(global.nodes);
 
+//draw the node connections -- lines
 for (var i = 0; i < _nodeCount; i++) {
     var _node = global.nodes[i];
     
-    //loop through each neighbor connected to this node
+    //check if the node is offscreen
+    if (_node.x < _cam_x - _pad || _node.x > _cam_x + _cam_w + _pad ||
+        _node.y < _cam_y - _pad || _node.y > _cam_y + _cam_h + _pad) {
+        continue;
+    }
+    
     var _neighborCount = array_length(_node.neighbors);
     for (var j = 0; j < _neighborCount; j++) {
         var _connection = _node.neighbors[j];
@@ -19,11 +32,15 @@ for (var i = 0; i < _nodeCount; i++) {
     }
 }
 
-//actual node dots
+//draw the actual nodes -- dots
 for (var i = 0; i < _nodeCount; i++) {
     var _node = global.nodes[i];
     
-
+    if (_node.x < _cam_x - _pad || _node.x > _cam_x + _cam_w + _pad ||
+        _node.y < _cam_y - _pad || _node.y > _cam_y + _cam_h + _pad) {
+        continue;
+    }
+    
     if (_node.type == "edge") {
         draw_set_color(c_red);    
     } else {

@@ -1,3 +1,5 @@
+if global.paused exit; 
+
 scr_get_controls();
 
 if !instance_exists(follow) { exit; };	

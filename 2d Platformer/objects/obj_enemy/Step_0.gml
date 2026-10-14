@@ -1,4 +1,18 @@
-var _startNode = get_nearest_node(x, y);
+if global.paused exit;
+
+if !instance_exists(obj_player) exit;
+
+canFallThroughPlat = false;//reset falling through semi-solid platforms
+
+var _startNode;
+if onGround
+{
+	_startNode = get_nearest_node(x, y, true);
+}
+else {
+	_startNode = get_nearest_node(temp_nearest_x, temp_nearest_y, true);
+}
+
 var _targetNode = get_nearest_node(obj_player.x, obj_player.y);
 
 //show_debug_message(jumpKeyBuffered);
@@ -30,7 +44,6 @@ moveDir = 0;
 
 //check if we have a valid path with at least a next waypoint
 if (array_length(path_to_follow) > 0) {
-    
     var _current_node = path_to_follow[0];
     var _next_node    = (array_length(path_to_follow) > 1) ? path_to_follow[1] : _current_node;
 	
@@ -42,9 +55,8 @@ if (array_length(path_to_follow) > 0) {
 	var _isJumpStep = false;
 
 	if (array_length(path_to_follow) > 1 && yspd <= 0) {
-    
-	    var _maxVertRise  = 32 * 4;
-	    var _maxVertFall  = 64;
+	    var _maxVertRise  = 32 * 5.5 - 1;
+		var _dist_to_node = abs(x - _current_node.x);
 	    var _dist_x       = abs(_next_node.x - _current_node.x);
 	    var _dist_y       = _next_node.y - _current_node.y;
     
@@ -52,10 +64,23 @@ if (array_length(path_to_follow) > 0) {
 	        var _link = _current_node.neighbors[i];
         
 	        if (_link.node == _next_node) {
-	            var _is_explicit_jump = (_link.action == "jump") && (_dist_y < 0) && (_dist_y >= -_maxVertRise);
-	            var _is_edge_gap = (_current_node.type == "edge" && _next_node.type == "edge" && _dist_x > 12 && _dist_y >= -_maxVertRise && _dist_y <= _maxVertFall);
+	            var _is_explicit_jump = (_link.action == "jump") && (_dist_y < 0) && (_dist_y >= -_maxVertRise) && _dist_to_node < 2;
+	            var _is_edge_gap = (_current_node.type == "edge" && _next_node.type == "edge" && _dist_x > 12 && _dist_to_node < 2 && _dist_y >= -_maxVertRise);
+				
+				var _check_height = abs(_next_node.y - y);
+				var _hasOverheadWall = collision_rectangle(
+				    x - (sprite_width / 2) - moveSpd, 
+				    y, 
+				    x + (sprite_width / 2) + moveSpd, 
+				    y - _check_height, 
+				    obj_wall, 
+				    false, 
+				    true
+				);
             
-	            if (_is_explicit_jump || _is_edge_gap) {
+				//if _hasOverheadWall show_debug_message("gg");
+				
+	            if ((_is_explicit_jump || _is_edge_gap) && !_hasOverheadWall) {
 	                _isJumpStep = true;
 	                break;
 	            }
@@ -63,73 +88,100 @@ if (array_length(path_to_follow) > 0) {
 	    }
 	}
 	
-    //horizontal movement
-    if (onGround) {
-        if (x < _target_x - 2) {
-            moveDir = 1;  //right
-        } 
-        else if (x > _target_x + 2) {
-            moveDir = -1; //left
-        } 
-        else {
-            moveDir = 0;
-        }
-	}
-    else {
-     
-		//airborne logic - moveDir = 0 when falling
-        if (yspd > 0) {
-            moveDir = 0;
-        } 
-		
-		moveDir = airDir;
+	//check if we are falling through a semi-solid plat along the path
+	if (array_length(path_to_follow) > 1 && yspd >= 0) {
+	    var _dist_y = _next_node.y - _current_node.y;
+	    var _is_vertical_drop = (abs(_current_node.x - _next_node.x) < 1);
+    
+	    for (var i = 0; i < array_length(_current_node.neighbors); i++) {
+	        var _link = _current_node.neighbors[i];
+        
+	        if (_link.node == _next_node) {
+	            if (_link.action == "jump" && _dist_y > 0 && _is_vertical_drop && onGround) {
+	                canFallThroughPlat = true;
+	                break;
+	            }
+	        }
+	    }
 	}
 	
-	if _isJumpStep && onGround {jumpKeyBuffered = true;
-			var _target_dest_x = _next_node.x;
-    
-		    //check the future node (path_to_follow[2]) as well as the next node (path_to_follow[1])
-		    if (abs(_next_node.x - _current_node.x) <= 1 && array_length(path_to_follow) > 2) {
-		        var _future_node = path_to_follow[2];
-		        _target_dest_x = _future_node.x; //point toward where we go after landing
-		    }
-    
-		    //set the airDir
-		    if (abs(x - _target_dest_x) > 1) {
-		        airDir = sign(_target_dest_x - x);
-		    } else {
-		        airDir = 0;
-		    }
-			
-			var _dist_x = abs(_next_node.x - x);//dist
-			var _dist_y = abs(_next_node.y - y);//height
-    
-			//max height
-			var _max_jump_height = 32 * 5.5; 
-    
-			//clamp the t between 0 and 1
-			var _t = clamp(_dist_y / _max_jump_height, 0, 1);
-    
-			//create the quadratic
-			var _quadratic_curve = _t * _t;
-    
-			//set the timer based on the section of the curve
-			jumpHoldTimer = round(8 + (_quadratic_curve * 12));
-		};
+	if (array_length(path_to_follow) > 2) {
+	    var _i = 1;
+	
+		var _max_lookahead = min(4, array_length(path_to_follow));
 		
-	//midair --- check if we need to keep the moveDir
-	if (!onGround) {
-		if (yspd > 0) || abs(_next_node.x - x) >= 32 {
-		    //falling
-		    moveDir = airDir;
-		} else {
-		    //ascent
-		    if (y < _next_node.y + 16) {
-		        moveDir = airDir;
-		    } else {
-		        moveDir = 0; //straight up until past wall
-		    }
-		}
+		for (var i = 1; i < _max_lookahead; i++) {
+	        if (path_to_follow[i].y < path_to_follow[0].y) {
+	            _max_lookahead = 3;
+	            break;
+	        }
+	    }
+		
+	    while (_i < _max_lookahead && _i < array_length(path_to_follow)) {
+	        if (path_to_follow[_i].type != "air") {
+	            _target_x = path_to_follow[_i].x;
+	            break;
+	        }
+	        _i++;
+	    }
+	}
+    
+	//show_debug_message(_target_x);
+	
+	//movement control
+	if (onGround) { //horizontal -- on the ground
+	    if (x < _target_x - 2) {
+	        moveDir = 1;  //right
+	    } 
+	    else if (x > _target_x + 2) {
+	        moveDir = -1; //left
+	    } else {
+	        moveDir = 0;
+	    }
+	} else { //in the air
+	    var _hasClearedHeight = (y <= _next_node.y + CELL_SIZE);
+
+        if (!_hasClearedHeight) {
+            //wait until we know we can clear the jump
+            airDir = 0;
+        } else {
+            //calculate airDir once
+            if (airDir == 0) {
+                var _air_target_x = _target_x;
+                var _lookahead_idx = 1;
+                
+                while (_air_target_x == _current_node.x && _lookahead_idx < array_length(path_to_follow)) { 
+                    _air_target_x = path_to_follow[_lookahead_idx].x;
+                    _lookahead_idx++;
+                }
+
+                if (abs(x - _air_target_x) > 2) {
+                    airDir = sign(_air_target_x - x);
+                }
+            }
+			
+			//prevent overshooting
+			if (y < _next_node.y) {
+	            if ((airDir == 1 && x >= _target_x) || (airDir == -1 && x <= _target_x)) {
+	                airDir = 0;
+	            }
+	        }
+        }
+        
+        moveDir = airDir;
+	}
+
+	if (_isJumpStep && onGround) {
+	    jumpKeyBuffered = true;
+		
+		//show_debug_message("jumping");
+	
+	    var _dist_y = abs(_next_node.y - y); // height
+	    var _max_jump_height = 32 * 5.5;     // max height
+	    var _t = clamp(_dist_y / _max_jump_height, 0, 1);
+	    var _quadratic_curve = _t * _t;
+
+	    jumpHoldTimer = round(8 + (_quadratic_curve * 12));
 	}
 }
 
@@ -358,7 +410,7 @@ x += xspd;
 		var _ycheck = y + 1 + _clamp_yspd;
 		if instance_exists(currentFloor) { _ycheck += max(0, currentFloor.yspd);};
 		var _semiSolid = check_for_semisolid_platform(x, _ycheck);
-	
+		
 		//loop through the colliding instances
 		for(var i = 0; i < _listSize; i++)
 		{
@@ -385,7 +437,7 @@ x += xspd;
 				}
 			}
 		}
-		
+	
 		//destroy the list
 		ds_list_destroy(_list);
 
@@ -426,7 +478,37 @@ x += xspd;
 				onGround = true;
 			}
 	
-//move the player in the y
+	
+	//manually fall through a semi-solid platform
+		if canFallThroughPlat
+		{
+			//make sure we have a semi-solid
+			if instance_exists(currentFloor)
+			&& (currentFloor.object_index == obj_semi_solid_wall || object_is_ancestor(currentFloor.object_index, obj_semi_solid_wall))
+			{
+				//check if we can go below the semi-solid
+				var _ycheck = max(1, currentFloor.yspd+1);
+				if !place_meeting(x, y + _ycheck, obj_wall)
+				{
+					//move below the platform
+					y += 1;
+					
+					
+					//inherit the platforms yspd
+					yspd = _ycheck;
+					
+					//forget this platform for a brief time so we don't get "stuck" again
+					forgetSemiSolidWall = currentFloor;
+					
+					onGround = false;
+					coyoteHangTimer = 0;
+					coyoteJumpTimer = 0;
+					currentFloor = noone;
+				}
+			}
+		}	
+
+//move the enemy in the y
 y += yspd;
 
 //reset the forget semi solid wall
@@ -507,6 +589,8 @@ if instance_exists(forgetSemiSolidWall) && !place_meeting(x, y, forgetSemiSolidW
 if onGround
 {
 	airDir = 0;
+	temp_nearest_x = x;
+	temp_nearest_y = y;
 }
 
 

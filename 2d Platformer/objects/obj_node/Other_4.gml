@@ -1,4 +1,4 @@
-// generate nodes on top of solid walls
+//generate nodes on top of solid walls
 with (obj_wall) {
 	if object_index != obj_moving_wall
 	{
@@ -18,7 +18,7 @@ with (obj_wall) {
 	            array_push(global.nodes, _newNode);
             
 	            if (_previousNode != noone) {
-	                var _pathBlocked = check_solid_wall_blocked(_previousNode.x, _previousNode.y - 4, _nodeX, _nodeY - 4);
+	                var _pathBlocked = check_wall_blocked(_previousNode.x, _previousNode.y - 4, _nodeX, _nodeY - 4);
 	                if (!_pathBlocked) {
 	                    _previousNode.connect(_newNode, "walk");
 	                    _newNode.connect(_previousNode, "walk");
@@ -51,7 +51,7 @@ with (obj_semi_solid_wall) {
                 array_push(global.nodes, _newNode);
                 
                 if (_previousNode != noone) {
-                    var _pathBlocked = check_solid_wall_blocked(_previousNode.x, _previousNode.y - 4, _nodeX, _nodeY - 4);
+                    var _pathBlocked = check_wall_blocked(_previousNode.x, _previousNode.y - 4, _nodeX, _nodeY - 4);
                     if (!_pathBlocked) {
                         _previousNode.connect(_newNode, "walk");
                         _newNode.connect(_previousNode, "walk");
@@ -61,6 +61,64 @@ with (obj_semi_solid_wall) {
             } else {
                 _previousNode = noone;
             }
+        }
+    }
+}
+
+with (obj_moving_wall) {
+    var _previousNode = noone;
+    
+    for (var _x = bbox_left; _x <= bbox_right; _x += CELL_SIZE) {
+        var _nodeX = _x + (CELL_SIZE / 2); 
+        var _nodeY = bbox_top - 16; 
+        
+        var _hasFloorBelow = position_meeting(_nodeX, _nodeY + 16, id); // check current instance
+        var _isAirAbove    = !position_meeting(_nodeX, _nodeY - 16, obj_wall) && !position_meeting(_nodeX, _nodeY - 16, obj_moving_wall);
+        var _inRoom        = (_nodeX >= 0 && _nodeX <= room_width && _nodeY >= 0 && _nodeY <= room_height);
+        
+        if (_hasFloorBelow && _isAirAbove && _inRoom) {
+            var _newNode = new global.NavNode(_nodeX, _nodeY, "walk", id);
+            array_push(global.nodes, _newNode);
+            
+            if (_previousNode != noone) {
+                var _pathBlocked = check_wall_blocked(_previousNode.x, _previousNode.y - 4, _nodeX, _nodeY - 4);
+                if (!_pathBlocked) {
+                    _previousNode.connect(_newNode, "walk");
+                    _newNode.connect(_previousNode, "walk");
+                }
+            }
+            _previousNode = _newNode;
+        } else {
+            _previousNode = noone;
+        }
+    }
+}
+
+with (obj_semi_solid_moving_wall) {
+    var _previousNode = noone;
+    
+    for (var _x = bbox_left; _x <= bbox_right; _x += CELL_SIZE) {
+        var _nodeX = _x + (CELL_SIZE / 2); 
+        var _nodeY = bbox_top - 16; 
+        
+        var _hasFloorBelow = position_meeting(_nodeX, _nodeY + 16, id);
+        var _isAirAbove    = !position_meeting(_nodeX, _nodeY - 16, obj_wall);
+        var _inRoom        = (_nodeX >= 0 && _nodeX <= room_width && _nodeY >= 0 && _nodeY <= room_height);
+        
+        if (_hasFloorBelow && _isAirAbove && _inRoom) {
+            var _newNode = new global.NavNode(_nodeX, _nodeY, "walk", id);
+            array_push(global.nodes, _newNode);
+            
+            if (_previousNode != noone) {
+                var _pathBlocked = check_wall_blocked(_previousNode.x, _previousNode.y - 4, _nodeX, _nodeY - 4);
+                if (!_pathBlocked) {
+                    _previousNode.connect(_newNode, "walk");
+                    _newNode.connect(_previousNode, "walk");
+                }
+            }
+            _previousNode = _newNode;
+        } else {
+            _previousNode = noone;
         }
     }
 }
@@ -84,7 +142,7 @@ for (var i = 0; i < _nodeCount; i++) {
 }
 
 //wall collision checks (ignores semi-solid walls so paths can draw through them)
-function check_solid_wall_blocked(_x1, _y1, _x2, _y2) {
+function check_wall_blocked(_x1, _y1, _x2, _y2) {
     var _dist = point_distance(_x1, _y1, _x2, _y2);
     var CELL_SIZEs = max(1, floor(_dist / 8));
     
@@ -97,9 +155,21 @@ function check_solid_wall_blocked(_x1, _y1, _x2, _y2) {
                 return true;
             }
         }
+		
+		 
+		with (obj_semi_solid_wall) {
+            //only check if blocked by semi-solid if at least one connection endpoint is above bbox_top
+            if (_y1 < bbox_top || _y2 < bbox_top) {
+                if (_px >= bbox_left && _px <= bbox_right && _py >= bbox_top + 4 && _py <= bbox_bottom) {
+                    return true;
+                }
+            }
+        }
     }
     return false;
 }
+
+var _nodeCount = array_length(global.nodes);
 
 //connect edge nodes using 2 outward air nodes perpendicular drops
 for (var i = 0; i < _nodeCount; i++) {
@@ -119,7 +189,7 @@ for (var i = 0; i < _nodeCount; i++) {
                 var _outY  = _nodeA.y;
                 
                 var _inRoom = (_outX2 >= 0 && _outX2 <= room_width && _outY >= 0 && _outY <= room_height);
-                var _airBlocked = check_solid_wall_blocked(_nodeA.x, _nodeA.y, _outX2, _outY);
+                var _airBlocked = check_wall_blocked(_nodeA.x, _nodeA.y, _outX2, _outY);
                 
                 if (_inRoom && !_airBlocked) {
                     //cast straight down to find the floor below
@@ -149,7 +219,7 @@ for (var i = 0; i < _nodeCount; i++) {
                         var _airDropX2 = _gridSnappedX;
                         
                         //check if vertical drop path is clear of solid walls
-                        var _dropBlocked = check_solid_wall_blocked(_airDropX2, _outY, _airDropX2, _landingY);
+                        var _dropBlocked = check_wall_blocked(_airDropX2, _outY, _airDropX2, _landingY);
                         
                         if (!_dropBlocked) {
                             //find or create landing node
@@ -171,7 +241,7 @@ for (var i = 0; i < _nodeCount; i++) {
 							        var _otherNode = global.nodes[k];
 							        //check for other horizontal nodes and connect them
 							        if (_otherNode != _landingNode && _otherNode.y == _landingY && abs(_otherNode.x - _landingNode.x) <= 32) {
-							            var _blocked = check_solid_wall_blocked(_landingNode.x, _landingNode.y - 4, _otherNode.x, _otherNode.y - 4);
+							            var _blocked = check_wall_blocked(_landingNode.x, _landingNode.y - 4, _otherNode.x, _otherNode.y - 4);
 							            if (!_blocked) {
 							                _landingNode.connect(_otherNode, "walk");
 							                _otherNode.connect(_landingNode, "walk");
@@ -180,8 +250,9 @@ for (var i = 0; i < _nodeCount; i++) {
 							    }
 							}
                             
-                            var _airNode1 = new global.NavNode(_airDropX1, _outY, "jump");
-                            var _airNode2 = new global.NavNode(_airDropX2, _outY, "jump");
+							var _airPlat = _nodeA.moving_platform; //get the node on the platform's platform
+                            var _airNode1 = new global.NavNode(_airDropX1, _outY, "air", _airPlat);
+                            var _airNode2 = new global.NavNode(_airDropX2, _outY, "air", _airPlat);
                             array_push(global.nodes, _airNode1);
                             array_push(global.nodes, _airNode2);
                             
@@ -202,6 +273,212 @@ for (var i = 0; i < _nodeCount; i++) {
     }
 }
 
+var _nodeCount = array_length(global.nodes);
+
+//connect edge nodes across gaps
+_nodeCount = array_length(global.nodes);
+for (var i = 0; i < _nodeCount; i++) {
+    var _nodeA = global.nodes[i];
+    
+    //skip if _nodeA is on a moving platform
+    if (_nodeA.moving_platform != noone) continue;
+    
+    if (_nodeA.type == "edge") {
+        var _checkDirs = [1, -1];
+        var _maxHorizJump = 32 * 8 + 1; 
+        var _maxVertRise  = 32 * 5.5;  
+        var _maxVertFall  = 32 * 2;  
+        
+        var _wallA = get_wall_instance_below(_nodeA);
+        
+        for (var d = 0; d < 2; d++) {
+            var _dir = _checkDirs[d];
+            
+            var _bestNodeB = noone;
+            var _minDist = infinity;
+            
+            for (var j = 0; j < _nodeCount; j++) {
+                var _nodeB = global.nodes[j];
+                
+                // Skip if Node B is on a moving platform
+                if (_nodeB.moving_platform != noone) continue;
+                
+                //must be a different node in the correct direction
+                if (_nodeB != _nodeA && _nodeB.type == "edge" && sign(_nodeB.x - _nodeA.x) == _dir) {
+                    var _wallB = get_wall_instance_below(_nodeB);
+                    var _sameWall = (_wallA != noone && _wallA == _wallB);
+                    
+                    if (!_sameWall) {
+                        var _distX = abs(_nodeB.x - _nodeA.x);
+                        var _distY = _nodeB.y - _nodeA.y; 
+                        
+                        //must be across an actual gap (> 32px) and within jump range
+                        if (_distX > 32 && _distX <= _maxHorizJump && _distY >= -_maxVertRise && _distY <= _maxVertFall) {
+                            var _pathBlocked = check_wall_blocked(_nodeA.x, _nodeA.y - 12, _nodeB.x, _nodeB.y - 12);
+                            
+                            if (!_pathBlocked) {
+                                var _totalDist = point_distance(_nodeA.x, _nodeA.y, _nodeB.x, _nodeB.y);
+                                
+                                //find the single closest valid edge across the gap
+                                if (_totalDist < _minDist) {
+                                    _minDist = _totalDist;
+                                    _bestNodeB = _nodeB;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            //connect the best edges across the gap
+            if (_bestNodeB != noone) {
+                _nodeA.connect(_bestNodeB, "jump");
+                _bestNodeB.connect(_nodeA, "jump");
+            }
+        }
+    }
+}
+
+//edges from platforms
+var _nodeCount = array_length(global.nodes);
+var _radius = 10 * 32; 
+
+for (var i = 0; i < _nodeCount; i++) {
+    var _nodeA = global.nodes[i];
+    
+    //only target edge nodes (and skip moving platforms)
+    if (_nodeA.type == "edge") && _nodeA.moving_platform != noone {
+        var _wallA = get_wall_instance_below(_nodeA);
+        var _checkDirs = [1, -1];
+        
+        for (var d = 0; d < 2; d++) {
+            var _dir = _checkDirs[d];
+            var _candidates = [];
+            
+            //gather all valid edge nodes within the radius
+            for (var j = 0; j < _nodeCount; j++) {
+                var _nodeB = global.nodes[j];
+                
+                if (_nodeB != _nodeA && _nodeB.type == "edge" && _nodeB.moving_platform == noone && sign(_nodeB.x - _nodeA.x) == _dir) {
+                    var _dist = point_distance(_nodeA.x, _nodeA.y, _nodeB.x, _nodeB.y);
+                    
+                    //must be within the 10-cell radius and across a gap (> 32px)
+                    if (_dist > 32 && _dist <= _radius) {
+                        var _wallB = get_wall_instance_below(_nodeB);
+                        
+                        //must not be on the exact same physical platform/wall instance
+                        if (_wallA == noone || _wallB == noone || _wallA != _wallB) {
+                            
+                            //check if path is blocked by general solid/semi-solid walls
+                            var _pathBlocked = check_wall_blocked(_nodeA.x, _nodeA.y - 12, _nodeB.x, _nodeB.y - 12);
+                            
+                            if (!_pathBlocked) {
+                                //ensure the connection line does not touch/intersect the source platform (_wallA)
+                                var _touchesPlatform = false;
+                                if (_wallA != noone) {
+                                    //sample points along the line to ensure it doesn't clip through its own platform's bounding box
+                                    var _steps = max(1, floor(_dist / 16));
+                                    for (var s = 1; s < _steps; s++) {
+                                        var _px = lerp(_nodeA.x, _nodeB.x, s / _steps);
+                                        var _py = lerp(_nodeA.y - 12, _nodeB.y - 12, s / _steps);
+                                        if (_px >= _wallA.bbox_left && _px <= _wallA.bbox_right && _py >= _wallA.bbox_top && _py <= _wallA.bbox_bottom) {
+                                            _touchesPlatform = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                if (!_touchesPlatform) {
+                                    array_push(_candidates, { node: _nodeB, dist: _dist });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            //sort the array to get the closest dist
+            array_sort(_candidates, function(a, b) {
+                return a.dist - b.dist;
+            });
+            
+            //connect
+            var _connectionsMade = 0;
+            var _candidateCount = array_length(_candidates);
+            
+            for (var c = 0; c < _candidateCount; c++) {
+                if (_connectionsMade >= 2) break;
+                
+                var _targetNode = _candidates[c].node;
+                
+                _nodeA.connect(_targetNode, "jump");
+                _targetNode.connect(_nodeA, "jump");
+                _connectionsMade++;
+            }
+        }
+    }
+}
+
+var _nodeCount = array_length(global.nodes);
+
+for (var i = 0; i < _nodeCount; i++) {
+    var _nodeA = global.nodes[i];
+    
+    for (var j = 0; j < _nodeCount; j++) {
+        var _nodeB = global.nodes[j];
+        
+        if (_nodeB != _nodeA) {
+            var _distX = abs(_nodeB.x - _nodeA.x);
+            var _distY = abs(_nodeB.y - _nodeA.y);
+            
+            //ff they are on the same vertical plane and within 34 pixels horizontally
+            if (_distY <= 2 && _distX <= 34) {
+                
+                //ensure no solid walls block the direct horizontal line between them
+                var _blocked = check_wall_blocked(_nodeA.x, _nodeA.y - 4, _nodeB.x, _nodeB.y - 4);
+                
+                if (!_blocked) {
+                    _nodeA.connect(_nodeB, "walk");
+                    _nodeB.connect(_nodeA, "walk");
+                }
+            }
+        }
+    }
+}
+
+with (obj_semi_solid_wall) {
+    if (object_index != obj_semi_solid_moving_wall) {
+        var _centerX = bbox_left + ((bbox_right - bbox_left) / 2);
+        
+        for (var i = 0; i < array_length(global.nodes); i++) {
+            var _nodeA = global.nodes[i];
+            
+            if (abs(_nodeA.x - _centerX) <= CELL_SIZE * 0.75 && abs((bbox_top - 16) - _nodeA.y) <= 2) {
+                var _bestNode = noone;
+                var _minDist = infinity;
+                
+                for (var j = 0; j < array_length(global.nodes); j++) {
+                    var _nodeB = global.nodes[j];
+                    if (_nodeB != _nodeA && abs(_nodeB.x - _nodeA.x) <= 2 && _nodeB.y > _nodeA.y) {
+                        var _dist = _nodeB.y - _nodeA.y;
+                        if (_dist < _minDist) {
+                            _minDist = _dist;
+                            _bestNode = _nodeB;
+                        }
+                    }
+                }
+                
+                if (_bestNode != noone) {
+                    _nodeA.connect(_bestNode, "jump");
+					_bestNode.connect(_nodeA, "jump");
+                }
+            }
+        }
+    }
+}
+
+var _nodeCount = array_length(global.nodes);
+
 for (var i = 0; i < _nodeCount; i++) {
     var _node = global.nodes[i];
     
@@ -221,81 +498,6 @@ for (var i = 0; i < _nodeCount; i++) {
         //if it's marked as an edge but has no jump/drop escape route, demote it to walk
         if (!_hasJumpConnection) {
 			_node.type = "walk";
-        }
-    }
-}
-
-//connect edge nodes across gaps
-for (var i = 0; i < array_length(global.nodes); i++) {
-    var _nodeA = global.nodes[i];
-    
-    if (_nodeA.type == "edge") {
-        var _checkDirs = [1, -1];
-        var _maxHorizJump = 32 * 5; 
-        var _maxVertRise  = 32 * 2;  
-        var _maxVertFall  = 32 * 2;  
-        
-        for (var d = 0; d < 2; d++) {
-            var _dir = _checkDirs[d];
-            
-            var _bestNodeB = noone;
-            var _minDist = infinity;
-            
-            for (var j = 0; j < array_length(global.nodes); j++) {
-                var _nodeB = global.nodes[j];
-                
-                //must be a different node in the correct direction
-                if (_nodeB != _nodeA && _nodeB.type == "edge" && sign(_nodeB.x - _nodeA.x) == _dir) {
-                    var _distX = abs(_nodeB.x - _nodeA.x);
-                    var _distY = _nodeB.y - _nodeA.y; 
-                    
-                    //must be across an actual gap (> 32px) and within jump range
-                    if (_distX > 32 && _distX <= _maxHorizJump && _distY >= -_maxVertRise && _distY <= _maxVertFall) {
-                        var _pathBlocked = check_solid_wall_blocked(_nodeA.x, _nodeA.y - 12, _nodeB.x, _nodeB.y - 12);
-                        
-                        if (!_pathBlocked) {
-                            var _totalDist = point_distance(_nodeA.x, _nodeA.y, _nodeB.x, _nodeB.y);
-                            
-                            //find the single closest valid edge across the gap
-                            if (_totalDist < _minDist) {
-                                _minDist = _totalDist;
-                                _bestNodeB = _nodeB;
-                            }
-                        }
-                    }
-                }
-            }
-            
-            //connect the best edges across the gap
-            if (_bestNodeB != noone) {
-                _nodeA.connect(_bestNodeB, "jump");
-                _bestNodeB.connect(_nodeA, "jump");
-            }
-        }
-    }
-}
-
-for (var i = 0; i < _nodeCount; i++) {
-    var _nodeA = global.nodes[i];
-    
-    for (var j = 0; j < _nodeCount; j++) {
-        var _nodeB = global.nodes[j];
-        
-        if (_nodeB != _nodeA) {
-            var _distX = abs(_nodeB.x - _nodeA.x);
-            var _distY = abs(_nodeB.y - _nodeA.y);
-            
-            //ff they are on the same vertical plane and within 34 pixels horizontally
-            if (_distY <= 2 && _distX <= 34) {
-                
-                //ensure no solid walls block the direct horizontal line between them
-                var _blocked = check_solid_wall_blocked(_nodeA.x, _nodeA.y - 4, _nodeB.x, _nodeB.y - 4);
-                
-                if (!_blocked) {
-                    _nodeA.connect(_nodeB, "walk");
-                    _nodeB.connect(_nodeA, "walk");
-                }
-            }
         }
     }
 }

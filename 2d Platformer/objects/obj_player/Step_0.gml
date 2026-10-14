@@ -1,3 +1,5 @@
+if global.paused exit;
+
 scr_get_controls();
 
 
@@ -260,8 +262,8 @@ x += xspd;
 			draw_face = _dir;
 	
 		    //apply speeds
-		    xspd = face * 6;       //xspd
-		    yspd = -5;             //yspd
+		    xspd = face * 7;       //xspd
+		    yspd = -2.5;             //yspd
     
 		    //reset jump variables
 		    jumpKeyBuffered = false;
