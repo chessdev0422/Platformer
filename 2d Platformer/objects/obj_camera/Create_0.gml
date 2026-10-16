@@ -30,3 +30,9 @@ yTo = 0;
 look_ahead = 0;
 
 up_down_amt = 0;
+
+
+//screenshake
+shake_length = 0;    //total duration in frames
+shake_magnitude = 0; //maximum distance to offset in pixels
+shake_remain = 0;    //remaining strength of the shake

@@ -1,0 +1,1 @@
+scr_declare_damage_nonplayer(10);

@@ -1,12 +1,32 @@
+if instance_exists(obj_textbox)
+{
+	global.paused = true;
+}
+
 if global.paused exit;
 
 scr_get_controls();
 
+scr_take_damage(obj_damage_player, true);
 
 //------------wall jump and slide checks-------/
-var _wallCheckLeft = place_meeting(x - 1, y, obj_wall) && leftKey;
-var _wallCheckRight = place_meeting(x + 1, y, obj_wall) && rightKey;
-var _touchingWall = (_wallCheckLeft || _wallCheckRight) && !onGround;
+var _wallCheckLeft = place_meeting(x - 1, y, obj_wall);
+var _wallCheckRight = place_meeting(x + 1, y, obj_wall);
+
+//slide only happens if touching the wall AND holding toward it while airborne
+var _isSlidingLeft = _wallCheckLeft && leftKey && !onGround;
+var _isSlidingRight = _wallCheckRight && rightKey && !onGround;
+var _touchingWall = _isSlidingLeft || _isSlidingRight;
+
+//wall buffer timer (grace window for wall jumping)
+if (_wallCheckLeft || _wallCheckRight) && !onGround
+{
+    wallJumpBufferTimer = wallJumpBufferFrames;
+}
+else if wallJumpBufferTimer > 0
+{
+    wallJumpBufferTimer--;
+}
 
 
 //get "unstuck" from walls that have moved into the player in the begin step
@@ -232,6 +252,51 @@ x += xspd;
 	
 	//jumping-------------/
 	
+		// wall jumps
+		if !onGround && wallJumpBufferTimer > 0 && wallJumpTimer <= 0 && jumpKeyBuffered
+		{
+		    var _canWallJump = false;
+		    var _jumpDir = 0;
+
+		    //wall jump is left, player holds right
+		    if _wallCheckLeft && rightKey 
+		    {
+		        _canWallJump = true;
+		        _jumpDir = 1; //push right
+		    }
+    
+		    //the opposite
+		    else if _wallCheckRight && leftKey 
+		    {
+		        _canWallJump = true;
+		        _jumpDir = -1;
+		    }
+
+		    //execute wall jump
+		    if _canWallJump
+		    {
+		        face = _jumpDir;
+		        draw_face = _jumpDir;
+
+		        
+		        xspd = face * 10; 
+		        yspd = -3;
+
+		        //reset
+		        jumpKeyBuffered = false;
+		        jumpKeyBufferTimer = 0;
+		        wallBufferTimer = 0;
+		        jumpHoldTimer = jumpHoldFrames[0];
+
+		        coyoteHangTimer = 0;
+		        coyoteJumpTimer = 0;
+		        currentFloor = noone;
+        
+		
+		        wallJumpTimer = wallJumpTimerFrames;
+		    }
+		}
+	
 		//on ground
 		if jumpKeyBuffered && jumpCount < maxJump && !_touchingWall && !crouching
 		{
@@ -248,34 +313,6 @@ x += xspd;
 			coyoteHangTimer = 0;
 			coyoteJumpTimer = 0;
 			currentFloor = noone;//VERY important to reset or wont be able to jump
-		}
-		
-		//wall jumps
-		if jumpKeyBuffered && !onGround && _touchingWall
-		{
-		    //determine which direction to push based on the wall you are touching
-		    var _dir = 0;
-		    if _wallCheckLeft  { _dir = 1; } //jump off left wall
-		    if _wallCheckRight { _dir = -1; } //jump off right wall
-    
-			face = _dir;
-			draw_face = _dir;
-	
-		    //apply speeds
-		    xspd = face * 10;       //xspd
-		    yspd = -3;             //yspd
-    
-		    //reset jump variables
-		    jumpKeyBuffered = false;
-		    jumpKeyBufferTimer = 0;
-		    jumpHoldTimer = jumpHoldFrames[0];
-    
-		    coyoteHangTimer = 0;
-		    coyoteJumpTimer = 0;
-		    currentFloor = noone;
-			
-			//set the wall jump timer
-			wallJumpTimer = wallJumpTimerFrames;
 		}
 		
 		//bouncy pads

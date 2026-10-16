@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_speakers",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_speakers",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Dialogue/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

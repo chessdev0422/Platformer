@@ -84,5 +84,16 @@ x = clamp(x, cam_min_x, cam_max_x);
 y = clamp(y, _min_y, _max_y);
 
 
+var _final_x = x;
+var _final_y = y;
+
+if (shake_remain > 0) {
+    _final_x += random_range(-shake_remain, shake_remain);
+    _final_y += random_range(-shake_remain, shake_remain);
+    
+    // Reduce shake strength over time
+    shake_remain = max(0, shake_remain - ((1 / shake_length) * shake_magnitude));
+}
+
 //set camera coords
-camera_set_view_pos(view_camera[0], x, y);
+camera_set_view_pos(view_camera[0], _final_x, _final_y);

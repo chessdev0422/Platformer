@@ -1,0 +1,12 @@
+{
+  "$GMShader":"",
+  "%Name":"dmgFlashShd",
+  "name":"dmgFlashShd",
+  "parent":{
+    "name":"Damage",
+    "path":"folders/Damage.yy",
+  },
+  "resourceType":"GMShader",
+  "resourceVersion":"2.0",
+  "type":1,
+}

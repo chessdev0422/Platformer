@@ -1,6 +1,12 @@
 // Inherit the parent event
 event_inherited();
 
-dir = 0;
-rotationSpd = 360 / (360); //180 = number of frames
-rad = 128;
+enum PlatformType {
+    circular,
+    horizontal,
+    vertical,
+    static_platform
+}
+
+center_x = xstart;
+center_y = ystart;

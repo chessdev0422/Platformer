@@ -62,6 +62,9 @@ jumpHoldTimer = 0;//a timer for how long jump button has been held
 jumpHoldFrames[0] = 20;//the amount of frames the player can hold the jump input for variable jump height
 jumpHoldFrames[1] = 10;//an array for each jumpCount of course
 
+wallJumpBufferTimer = 0;//buffer frames when wall jumping
+wallJumpBufferFrames = 6;
+
 onGround = true;//whether or not the player has solid ground directly beneath them
 
 
@@ -100,3 +103,15 @@ moveWallxspd = 0;//the speed of the wall we are standing on
 forgetSemiSolidWall = noone;
 
 earlyMoveWallxspd = false;
+
+
+
+
+////damage --- hp - setup
+hp = 20;//initialize the hp
+maxHP = hp;//maximum hp the player has (cannot overfill)
+scr_declare_damage_player();//initalize damage and iFrames
+
+damageShader = false;//whether or not to draw the damage shader
+damageShaderTimer = 0; //timer to keep track of shader
+damageShaderFrames = 30; //the length of the damage shader to last

@@ -39,5 +39,5 @@ map_y = (gui_h - scaled_room_h) / 2; //map room start event
 //minimap
 minimap_w = (scaled_room_w) / minimap_size_div;
 minimap_h = (scaled_room_h) / minimap_size_div;
-minimap_x = 32;
-minimap_y = gui_h - minimap_h - 32;
+minimap_x = gui_w - minimap_w - 32;
+minimap_y = 32;

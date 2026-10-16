@@ -1,6 +1,6 @@
 if !surface_exists(map_surface_bg)
 {
-	//create a new surfacee
+	//create a new surface
 	map_surface_bg = surface_create(room_width, room_height);
 	
 	surface_set_target(map_surface_bg);
@@ -52,6 +52,7 @@ if (instance_exists(obj_player)) {
 	//draw the dot
 	draw_set_color(c_red);
 	draw_sprite(spr_player_icon, 0, p_x, p_y);
+	draw_set_color(c_white);
 }
 
 surface_reset_target();
