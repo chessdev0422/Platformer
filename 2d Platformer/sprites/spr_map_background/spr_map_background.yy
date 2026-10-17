@@ -45,7 +45,7 @@
   "origin":0,
   "parent":{
     "name":"Map",
-    "path":"folders/Map.yy",
+    "path":"folders/UI/Map.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

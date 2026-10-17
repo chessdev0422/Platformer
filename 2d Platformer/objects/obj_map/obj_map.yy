@@ -14,7 +14,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"Map",
-    "path":"folders/Map.yy",
+    "path":"folders/UI/Map.yy",
   },
   "parentObjectId":null,
   "persistent":true,

@@ -21,6 +21,17 @@ function scr_declare_damage_nonplayer(_hp, iframes = false)
 	}
 }
 
+function scr_knockback(_x, _y, _strength_x, _strength_y)
+{
+	if (x > _x) {
+        xspd = _strength_x;
+    } else {
+        xspd = -_strength_x;
+    }
+    
+    yspd = -_strength_y;
+}
+
 function scr_take_damage( _damageObj, iframes = false)
 {
 	
@@ -96,12 +107,16 @@ function scr_take_damage( _damageObj, iframes = false)
 					damageShader = true;//run the damage flash shader(red)
 					damageShaderTimer = 6;
 					
+					if object_index == obj_player
+					{
+						//hit pause -- meaning for about hitPauseFrames (3) frames player is "stunned"
+						global.hitPause = true;
+						global.hitPauseTimer = global.hitPauseFrames;
+					}
+					
 					//tell the instance to delete itself
 					if _inst.pierce == false
 					{
-						//add in hit pause
-						///
-						//
 						_inst.destroy = true;
 					}
 					else
@@ -113,17 +128,24 @@ function scr_take_damage( _damageObj, iframes = false)
 						}
 					}
 					
+					if object_index == obj_player
+					{
+						//screenshake
+						ScreenShake(5, 20); //rather than hard-coded numbers, the value could be determined by
+						//the enemy that hits you, for example, default val = 5, 5 * enemy_strength to determine
+						//total strength + time
+					}
 					
-					//screenshake
-					ScreenShake(5, 20); //rather than hard-coded numbers, the value could be determined by
-					//the enemy that hits you, for example, default val = 5, 5 * enemy_strength to determine
-					//total strength + time
+					//set up the knockback variables --- run the script in the step event
+					knockBackTimer = knockBackFrames;
+					knockBackX = _inst.x;
+					knockBackY = _inst.y;
 				}
 			}
 			
 			if iframes == true && _hitConfirm == true
 			{
-				iframeTimer = iframeNumber;
+				iframeTimer = iframeNumber;//set the iFrames up and running after taking damage
 			}
 		}
 		/*destroy the ds_list to avoid a memory leak*/ /***Important*** not ds_list_delete, as that would only destroy

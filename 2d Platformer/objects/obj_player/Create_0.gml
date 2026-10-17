@@ -53,7 +53,14 @@ terminal_vel[1] = 2;//the slide speed when touching a wall
 
 jumpSpd[0] = -7; //speed player jumps at
 jumpSpd[1] = -12//when bouncing
-#macro BOUNCING 1
+
+pogoSpd = -5;//force upwards after a pogo
+pogoWaitTimer = 0;
+pogoWaitFrames = 60/2;//1/2 seconds to wait before the next pogo attempt
+pogoBounce = false;
+
+
+#macro BOUNCING 1 //bouncing
 
 maxJump = 2;//the max amount of jumps the player has, defaulted to 1, 2 = double jump, 3 = triple jump, etc
 jumpCount = 0;//the current index of jump we are on, 1 = already used first jump
@@ -61,6 +68,9 @@ jumpHoldTimer = 0;//a timer for how long jump button has been held
 
 jumpHoldFrames[0] = 20;//the amount of frames the player can hold the jump input for variable jump height
 jumpHoldFrames[1] = 10;//an array for each jumpCount of course
+
+pogoHoldTimer = 0;
+pogoHoldFrames = jumpHoldFrames[1]; //same strength as the second jump
 
 wallJumpBufferTimer = 0;//buffer frames when wall jumping
 wallJumpBufferFrames = 6;
@@ -83,7 +93,7 @@ coyoteJumpTimer = 0;
 
 
 //sprite control-----------/
-draw_face = 1;
+last_face = 1;
 maskSpr = spr_player;
 crouchMaskSpr = spr_player;
 idleSpr = spr_player;
@@ -93,6 +103,7 @@ jumpSpr = spr_player;
 attackSpr = spr_player;
 crouchSpr = spr_player;
 slideSpr = spr_player;
+pogoSpr = spr_player;
 
 //state variables
 crouching = false;
@@ -107,7 +118,7 @@ earlyMoveWallxspd = false;
 
 
 
-////damage --- hp - setup
+////damage --- hp -- knockback - setup
 hp = 20;//initialize the hp
 maxHP = hp;//maximum hp the player has (cannot overfill)
 scr_declare_damage_player();//initalize damage and iFrames
@@ -115,3 +126,11 @@ scr_declare_damage_player();//initalize damage and iFrames
 damageShader = false;//whether or not to draw the damage shader
 damageShaderTimer = 0; //timer to keep track of shader
 damageShaderFrames = 30; //the length of the damage shader to last
+
+//knockback
+knockBackX = 0;//the x to pass into the knockback function
+knockBackY = 0;//the y to pass into the knockback function
+knockBackStrengthX = 5;//the strength the player will be knocked back with on the x-axis
+knockBackStrengthY = 5;//the strength the player will be knocked back with on the y-axis
+knockBackTimer = 0;
+knockBackFrames = 20;//length of the knockback

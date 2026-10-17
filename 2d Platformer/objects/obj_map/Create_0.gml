@@ -8,7 +8,7 @@ map_y = 0; //the top left y position of the map corner
 map_width = 0; //the width of the map
 map_height = 0; //the height of the map
 
-map_coverage = 0.75; //the percentage of screen space the map takes up
+map_coverage = 0.65; //the percentage of screen space the map takes up
 
 //the scale to draw the map at (not the same as the actual coverage, this is the x and y scale----
 //multiplied by the width and height to get the final scaled w and h)

@@ -6,6 +6,11 @@ function scr_controls_setup()
 	
 	jumpKeyBuffered = false;
 	jumpKeyBufferTimer = 0;
+	
+	pogoKeyBuffered = false;
+	
+	pogoBounceBufferTimer = 0;
+	pogoBounceBufferTime = 10;
 }
 
 
@@ -62,7 +67,10 @@ function scr_get_controls()
 	jumpKeyHeld = keyboard_check(vk_space) || gamepad_button_check(0, gp_face2); 
 	
 	runKey = keyboard_check(vk_shift) || gamepad_button_check(0, gp_face3);
+
+	pogoKeyPressed = keyboard_check_pressed(vk_shift) || gamepad_button_check_pressed(0, gp_face3);
 	
+	pogoKeyHeld = keyboard_check(vk_shift) || gamepad_button_check(0, gp_face3);
 	
 	//UI inputs
 	mapKey = keyboard_check_pressed(ord("M"));
@@ -81,6 +89,19 @@ function scr_get_controls()
 			jumpKeyBufferTimer--;
 		} else {
 			jumpKeyBuffered = false;
+		}
+		
+		//jump key buffering
+		if pogoKeyPressed
+		{
+			pogoBounceBufferTimer = pogoBounceBufferTime;
+		}
+		if pogoBounceBufferTimer > 0
+		{
+			pogoKeyBuffered = true;
+			pogoBounceBufferTimer--;
+		} else {
+			pogoKeyBuffered = false;
 		}
 	}
 }

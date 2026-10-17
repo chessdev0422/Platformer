@@ -5,17 +5,89 @@ if instance_exists(obj_textbox)
 
 if global.paused exit;
 
-scr_get_controls();
+scr_get_controls(); //access the controls
 
-scr_take_damage(obj_damage_player, true);
+scr_take_damage(obj_damage_player, true); //take damage from player damaging objects
 
+//knockback
+if knockBackTimer > 0
+{
+	knockBackTimer--;//subtract from the timer
+	scr_knockback(knockBackX, knockBackY, knockBackStrengthX, knockBackStrengthY); //run the knockback script
+}
+
+
+if damageShaderTimer > 0
+{
+	damageShaderTimer--;
+} else { //subtract the damage shader timer
+	damageShader = false;
+}
+
+if global.hitPauseTimer > 0
+{
+	global.hitPauseTimer--;
+} else {
+	global.hitPause = false;
+}
+
+if global.hitPause exit; //don't run any of the rest of the step event if hit "pausing"
+
+var _damaged = iframeTimer > 0; //if we were just damaged, we are unable to jump, pogo, etc
+
+//show_debug_message(pogoBounce);
+
+//--------pogos------------//
+if pogoKeyBuffered && !onGround && !pogoBounce && pogoWaitTimer <= 0 && !_damaged//if we have attempted to initate a pogo and are not on the ground, not already successful
+{
+	scr_pogo();//check for a pogo
+}
+
+if pogoWaitTimer > 0
+{
+	pogoWaitTimer--;//subtract from the timer	
+}
+
+//on ground
+	if pogoBounce
+	{
+		yspd = pogoSpd;//set the player jumping
+		
+		pogoKeyBuffered = false;//reset
+		pogoBounce = false;
+		pogoBounceBufferTimer = 0;
+		
+		pogoHoldTimer = pogoHoldFrames;//start the timer for how long the pogo button has been held
+		onGround = false; //reset everything when jumping
+		coyoteHangTimer = 0;
+		coyoteJumpTimer = 0;
+		currentFloor = noone;//VERY important to reset or wont be able to jump
+		
+		pogoWaitTimer = pogoWaitFrames;//start the counter to not be able pogo until
+	}
+			
+		//cut off the pogo when the button is released
+		if !pogoKeyHeld
+		{
+			pogoHoldTimer = 0;
+		}
+	
+		if pogoHoldTimer > 0
+		{
+			//constantly set the yspd to be the pogo-ing speed
+			yspd = pogoSpd;
+			//count down the timer
+			pogoHoldTimer--;
+		} 
+
+#region moving and collisions
 //------------wall jump and slide checks-------/
 var _wallCheckLeft = place_meeting(x - 1, y, obj_wall);
 var _wallCheckRight = place_meeting(x + 1, y, obj_wall);
 
 //slide only happens if touching the wall AND holding toward it while airborne
-var _isSlidingLeft = _wallCheckLeft && leftKey && !onGround;
-var _isSlidingRight = _wallCheckRight && rightKey && !onGround;
+var _isSlidingLeft = _wallCheckLeft && leftKey && !onGround && yspd >= 0;
+var _isSlidingRight = _wallCheckRight && rightKey && !onGround && yspd >= 0;
 var _touchingWall = _isSlidingLeft || _isSlidingRight;
 
 //wall buffer timer (grace window for wall jumping)
@@ -178,18 +250,21 @@ if wallJumpTimer > 0
 		yspd = 0;
 	}
 } else {
-	//direction
-	face = rightKey - leftKey;
+	if knockBackTimer <= 0
+	{
+		//direction
+		face = rightKey - leftKey;
 	
-	///set the moveType
-	if onGround {
-		moveType = runKey;
+		///set the moveType
+		if onGround {
+			moveType = runKey;
+		}
+	
+		//set xspd
+		xspd = face * moveSpd[moveType];
+	
+		if face != 0 {last_face = face;};
 	}
-	
-	//set xspd
-	xspd = face * moveSpd[moveType];
-	
-	if face != 0 {draw_face = face;};
 }
 	//X collision ----- /
 	
@@ -218,10 +293,10 @@ x += xspd;
 		//subtract from the coyote hang timer
 		coyoteHangTimer--;
 	} else { 
-		//gravity, only if coyote hang timer <= 0
-		yspd += grav;
-		onGround = false;
-		coyoteHangTimer = 0;
+			//gravity, only if coyote hang timer <= 0
+			yspd += grav;
+			onGround = false;
+			coyoteHangTimer = 0;
 	}
 	
 	//cap the yspd based on the terminal vel
@@ -252,21 +327,21 @@ x += xspd;
 	
 	//jumping-------------/
 	
-		// wall jumps
+		/*// wall jumps
 		if !onGround && wallJumpBufferTimer > 0 && wallJumpTimer <= 0 && jumpKeyBuffered
 		{
 		    var _canWallJump = false;
 		    var _jumpDir = 0;
 
-		    //wall jump is left, player holds right
-		    if _wallCheckLeft && rightKey 
+		    //wall jump is left
+		    if _wallCheckLeft
 		    {
 		        _canWallJump = true;
 		        _jumpDir = 1; //push right
 		    }
     
 		    //the opposite
-		    else if _wallCheckRight && leftKey 
+		    else if _wallCheckRight
 		    {
 		        _canWallJump = true;
 		        _jumpDir = -1;
@@ -276,11 +351,11 @@ x += xspd;
 		    if _canWallJump
 		    {
 		        face = _jumpDir;
-		        draw_face = _jumpDir;
+		        last_face = _jumpDir;
 
 		        
-		        xspd = face * 10; 
-		        yspd = -3;
+		        xspd = face * 6.5; 
+		        yspd = -1;
 
 		        //reset
 		        jumpKeyBuffered = false;
@@ -295,10 +370,10 @@ x += xspd;
 		
 		        wallJumpTimer = wallJumpTimerFrames;
 		    }
-		}
+		}*/
 	
 		//on ground
-		if jumpKeyBuffered && jumpCount < maxJump && !_touchingWall && !crouching
+		if jumpKeyBuffered && jumpCount < maxJump && !_touchingWall /*touching wall being sliding*/ && !crouching && !_damaged
 		{
 			yspd = jumpSpd[0];//set the player jumping
 		
@@ -434,6 +509,7 @@ x += xspd;
 		{
 			onGround = true;
 			coyoteHangTimer = coyoteHangFrames;
+			pogoWaitTimer = 0;
 		}
 		
 		//land on the ground platform if there is one
@@ -461,6 +537,7 @@ x += xspd;
 				//set on ground to be true
 				onGround = true;
 				coyoteHangTimer = coyoteHangFrames;
+				pogoWaitTimer = 0;
 			}
 	
 		//manually fall through a semi-solid platform
@@ -622,4 +699,9 @@ if _touchingWall {sprite_index = slideSpr}
 //crouching
 if crouching = true {sprite_index = crouchSpr;};
 
+//pogo-ing
+if pogoBounce ||  pogoHoldTimer > 0 {sprite_index = pogoSpr;}
+
 //attacking
+
+#endregion

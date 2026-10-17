@@ -9,7 +9,7 @@ var _camHeight = camera_get_view_height(view_camera[0]);
 
 
 //X------------/
-var _target_look_ahead = follow.draw_face * 48;
+var _target_look_ahead = follow.last_face * 48;
 
 look_ahead = lerp(look_ahead, _target_look_ahead, 0.2);
 

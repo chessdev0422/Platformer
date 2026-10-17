@@ -89,9 +89,10 @@ if mapShowing {
 	//reset the scissor
 	gpu_set_scissor(-1, -1, -1, -1);
 } 
-else 
+if !mapShowing //or invShowing or questsShowing etc
 {
-
+	if instance_exists(obj_warp) {exit;}
+	if global.paused { draw_set_alpha(0.5);}
 	gpu_set_scissor(minimap_x * gui_scale_x, minimap_y * gui_scale_y, minimap_w * gui_scale_x, minimap_h * gui_scale_y);
 
 	var spr_w = sprite_get_width(spr_map_background);
@@ -109,4 +110,6 @@ else
 	}
 
 	gpu_set_scissor(-1, -1, -1, -1);
+	
+	draw_set_alpha(1);
 }
