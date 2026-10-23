@@ -1,3 +1,4 @@
+
 if !surface_exists(map_surface_bg)
 {
 	//create a new surface
@@ -30,6 +31,7 @@ if !surface_exists(map_surface_bg)
 			draw_set_alpha(0.5);
 			draw_rectangle(x, y, x + CELL_SIZE*image_xscale, y + CELL_SIZE*image_yscale, false);
 			draw_set_alpha(1);
+			draw_set_colour(c_white);
 		}
 	}
 	
@@ -68,6 +70,7 @@ if mapShowing {
 	var draw_scale_x = scaled_room_w / spr_w;
 	var draw_scale_y = scaled_room_h / spr_h;
 	
+	var _scissor = gpu_get_scissor(); //get the scissor
 	//set the scissor to cut off the map edges
 	gpu_set_scissor(map_x * gui_scale_x, map_y * gui_scale_y, scaled_room_w * gui_scale_x, scaled_room_h * gui_scale_y);
 	
@@ -87,12 +90,18 @@ if mapShowing {
 	}
 	
 	//reset the scissor
-	gpu_set_scissor(-1, -1, -1, -1);
-} 
-if !mapShowing //or invShowing or questsShowing etc
+	gpu_set_scissor(_scissor);
+}
+
+if !mapShowing && !obj_inventory_manager.invShowing && !obj_inventory_manager.otherShowing //questsShowing etc
 {
 	if instance_exists(obj_warp) {exit;}
 	if global.paused { draw_set_alpha(0.5);}
+	
+	
+	//get the scissor
+	var _scissor = gpu_get_scissor();
+	//set the scissor
 	gpu_set_scissor(minimap_x * gui_scale_x, minimap_y * gui_scale_y, minimap_w * gui_scale_x, minimap_h * gui_scale_y);
 
 	var spr_w = sprite_get_width(spr_map_background);
@@ -109,7 +118,7 @@ if !mapShowing //or invShowing or questsShowing etc
 		draw_surface_stretched(map_surface_ent, minimap_x - minimap_pan_x, minimap_y - minimap_pan_y, total_width/minimap_size_div, total_height/minimap_size_div);
 	}
 
-	gpu_set_scissor(-1, -1, -1, -1);
+	gpu_set_scissor(_scissor);
 	
 	draw_set_alpha(1);
 }

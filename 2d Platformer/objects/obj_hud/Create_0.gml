@@ -1,0 +1,1 @@
+pulse_timer = 0;//timer for pulsing dmg effect when player is at low health

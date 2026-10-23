@@ -1,5 +1,8 @@
 scr_get_controls();
 
+
+draw_set_font(normal_font);
+
 var _mouse_x = device_mouse_x_to_gui(0);
 var _mouse_y = device_mouse_y_to_gui(0);
 
@@ -188,18 +191,18 @@ if draw_char == text_length[page] && page = _total_pages_check
 		var _oy = _ty - (_oh)*option_number + (_oh)*i;
 		var _ow = ((string_width(option[i]))) + op_border * 2;
 		
+		if (option_pos == i)
+		{
+			_ox += push_over_amt; 
+			var a_w = sprite_get_width(spr_textbox_arrow);
+			draw_sprite(spr_textbox_arrow, 0, _ox - a_w - 4, _oy + _oh/2);
+		}
+		
 		if point_in_rectangle(_mouse_x, _mouse_y, _ox, _oy, _ox + _ow, _oy + _oh)
 		{
 			option_pos = i;
 			option_hover = true;
 			alarm[0] = 5;
-		}
-		
-		if option_pos == i
-		{
-			_ox += push_over_amt;
-			var a_w = sprite_get_width(spr_textbox_arrow);
-			draw_sprite(spr_textbox_arrow, 0, _ox - a_w - 4, _oy + _oh/2);
 		}
 		
 		//draw the box

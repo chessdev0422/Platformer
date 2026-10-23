@@ -7,7 +7,7 @@ height = 84;
 
 border = 8; //distance from the sides of the textbox to the actual text
 
-line_sep = 16; //separation of the line breaks
+line_sep = 20; //separation of the line breaks
 line_width = width - border*2;//width of the lines of text
 
 page = 0;

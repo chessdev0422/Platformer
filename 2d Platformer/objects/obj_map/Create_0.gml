@@ -2,13 +2,11 @@ scr_controls_setup();
 
 mapShowing = false;//whether or not the map is pulled up
 
-map_x = 0; //the top left x position of the map corner
-map_y = 0; //the top left y position of the map corner
+map_x = 128; //the top left x position of the map corner
+map_y = 96; //the top left y position of the map corner
 
-map_width = 0; //the width of the map
-map_height = 0; //the height of the map
-
-map_coverage = 0.65; //the percentage of screen space the map takes up
+map_width = 384; //the width of the map
+map_height = 224; //the height of the map
 
 //the scale to draw the map at (not the same as the actual coverage, this is the x and y scale----
 //multiplied by the width and height to get the final scaled w and h)

@@ -11,8 +11,8 @@ var gui_w = display_get_gui_width();
 var gui_h = display_get_gui_height();
 
 //get the width
-var target_w = gui_w * map_coverage;
-var target_h = gui_h * map_coverage;
+var target_w = map_width;
+var target_h = map_height;
 
 
 //determine the scale
@@ -29,11 +29,6 @@ scaled_room_h = room_height * total_scale_y;
 
 total_width = room_width/4;
 total_height = room_height/4;
-
-
-//find the actual x and y, top left corner
-map_x = (gui_w - scaled_room_w) / 2;
-map_y = (gui_h - scaled_room_h) / 2; //map room start event
 
 
 //minimap

@@ -13,7 +13,7 @@ function scr_pogo()
 	        var _inst = _pogo_list[| i]; //get the instance ID
         
 	        //check if that instance's object_index has the "pogo" tag
-	        if (asset_has_tags(_inst.object_index, "pogo", asset_object)) && bbox_bottom-20 <= _inst.bbox_top {
+	        if (asset_has_tags(_inst.object_index, "pogo", asset_object)) && bbox_bottom-20 <= (_inst.bbox_top + _inst.bbox_bottom)/2 {
 	            _pogo_triggered = true;
 	            break; //leave the loop 
 	        }

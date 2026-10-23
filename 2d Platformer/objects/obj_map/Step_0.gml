@@ -11,7 +11,7 @@ if instance_exists(obj_player)
 	minimap_pan_y = clamp(minimap_pan_y, min(0, _th - minimap_h), max(0, _th - minimap_h));
 }
 	
-if mapKey 
+if mapKey && !instance_exists(obj_textbox) && !obj_inventory_manager.invShowing
 {
 	mapShowing = !mapShowing;
 	global.paused = !global.paused;	

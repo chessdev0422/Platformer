@@ -1,3 +1,23 @@
+if keyboard_check_pressed(ord("V"))
+{
+	var _cam_x = camera_get_view_x(view_camera[0]);
+	var _cam_y = camera_get_view_y(view_camera[0]);
+	var _cam_w = camera_get_view_width(view_camera[0]);
+	var _cam_h = camera_get_view_height(view_camera[0]);
+	var _random_x_offset = irandom(0 + _cam_w);
+	var _random_y_offset = irandom(0 + _cam_h);
+	instance_create_depth(_cam_x + _random_x_offset, _cam_y + _random_y_offset, 0, obj_fireball);
+}
+
+if keyboard_check_pressed(ord("T")) && !global.paused
+{
+	if obj_inventory_manager.otherShowing == noone
+	{
+		obj_inventory_manager.otherShowing = inst_23232D55;
+	}
+	global.paused = true;
+}
+
 if instance_exists(obj_textbox)
 {
 	global.paused = true;

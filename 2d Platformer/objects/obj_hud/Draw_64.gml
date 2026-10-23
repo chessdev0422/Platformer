@@ -36,6 +36,44 @@ if instance_exists(obj_player)
 		//draw the heart
 		draw_sprite(_spr, _health_img, _xx, _yy);
 	}
+
+	if (_hp <= 2) {
+   
+	    pulse_timer += 0.05;
+    
+	    var alpha = 0.4 + sin(pulse_timer) * 0.2;
+
+	    pulse_timer += 0.05;
+   
+	    var max_alpha = 0.225 + sin(pulse_timer) * 0.125;
+    
+	    var w = display_get_gui_width();
+	    var h = display_get_gui_height();
+	    var edge_thickness = 80; //thickness of the border in pixels
+    
+	    draw_primitive_begin(pr_trianglestrip);
+    
+	    //top
+	    draw_vertex_color(0, 0, c_red, max_alpha);
+	    draw_vertex_color(edge_thickness, edge_thickness, c_red, 0);
+	    draw_vertex_color(w, 0, c_red, max_alpha);
+	    draw_vertex_color(w - edge_thickness, edge_thickness, c_red, 0);
+    
+	    //right
+	    draw_vertex_color(w, h, c_red, max_alpha);
+	    draw_vertex_color(w - edge_thickness, h - edge_thickness, c_red, 0);
+    
+	    //bottom
+	    draw_vertex_color(0, h, c_red, max_alpha);
+	    draw_vertex_color(edge_thickness, h - edge_thickness, c_red, 0);
+    
+		//left
+	    draw_vertex_color(0, 0, c_red, max_alpha);
+	    draw_vertex_color(edge_thickness, edge_thickness, c_red, 0);
+    
+	    draw_primitive_end();
+	}
 	
 	draw_set_alpha(1);
+	
 }
