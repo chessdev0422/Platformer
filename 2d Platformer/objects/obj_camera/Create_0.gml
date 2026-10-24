@@ -36,3 +36,16 @@ up_down_amt = 0;
 shake_length = 0;    //total duration in frames
 shake_magnitude = 0; //maximum distance to offset in pixels
 shake_remain = 0;    //remaining strength of the shake
+
+
+view_enabled = true;
+view_visible[0] = true;
+camera_set_view_size(view_camera[0], base_width, base_height);
+
+
+var _cam_w = camera_get_view_width(view_camera[0]);
+global.target_max_x = room_width - _cam_w;
+global.target_min_x = 0;
+
+global.target_max_y = room_height;
+global.target_min_y = 0;

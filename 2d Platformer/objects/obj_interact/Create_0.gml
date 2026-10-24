@@ -1,3 +1,5 @@
+interacting = false;
+
 invSlotsHeight = 2;
 currentPage = 0;
 maxPages = 1;//set up in creation code

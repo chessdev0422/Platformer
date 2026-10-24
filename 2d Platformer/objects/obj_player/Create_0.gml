@@ -134,3 +134,9 @@ knockBackStrengthX = 5;//the strength the player will be knocked back with on th
 knockBackStrengthY = 5;//the strength the player will be knocked back with on the y-axis
 knockBackTimer = 0;
 knockBackFrames = 20;//length of the knockback
+
+
+//interacting
+interactDist = 4;
+interactInst = noone;
+registeredInteract = false;

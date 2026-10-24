@@ -37,6 +37,9 @@ if instance_exists(obj_player)
 		draw_sprite(_spr, _health_img, _xx, _yy);
 	}
 
+	//draw the coin text
+	draw_text(32, 64, "Coins: " + string(global.coins));
+	
 	if (_hp <= 2) {
    
 	    pulse_timer += 0.05;

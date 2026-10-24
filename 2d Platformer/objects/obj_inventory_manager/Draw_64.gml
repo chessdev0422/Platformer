@@ -104,8 +104,8 @@ if invShowing
 			var _ixx = _xx + _sw/2;
 			var _iyy = _yy + _sh/2;
 			
-			draw_sprite_ext(_item_spr, 0, _ixx, _iyy, 1 * _sizeMod, 1 * _sizeMod, 0, c_white, 1);
-			
+			draw_sprite_ext(_item_spr, 0, _ixx, _iyy, 1 /** _sizeMod*/, 1 /** _sizeMod*/, 0, c_white, 1);
+
 			//draw the item quantity
 			var _quantity = _inv[i].amount;	
 			
@@ -143,7 +143,7 @@ if invShowing
 		    closePercent = closeTarget;
 		}
 		
-		if (closePercent > 0) {
+		if (closePercent > 0) && hoveredItem != -1 {
 			
 			var _gui_w = display_get_gui_width(); ///get gui to window resolutions
 			var _gui_h = display_get_gui_height();
@@ -430,6 +430,28 @@ if invShowing
     
 	    draw_sprite_ext(spr_category_icons, i, _icon_x, _icon_y, 1, 1, 0, c_white, 1);
 	}
+	
+	//top right X-------/
+	var _xsw = sprite_get_width(closeSpr);
+	var _xsh = sprite_get_height(closeSpr);
+	var _xxx = closeStartX + _xsw/2;
+	var _xyy = closeStartY + _xsh/2;
+	
+	if point_in_rectangle(_mouse_x, _mouse_y, _xxx - _xsw/2, _xyy - _xsh/2, _xxx + _xsw/2, _xyy + _xsh/2)
+	{
+		closeAnim = lerp(closeAnim, 1.1, 0.3);//lerp towards a bigger size
+				
+		if lmButton || rmButton
+		{
+			invShowing = false;
+			global.paused = false;
+		}				
+	} else {
+		closeAnim = lerp(closeAnim, 1, 0.5);//lerp towards 1, meaning no size change
+	}
+	
+	draw_sprite_ext(closeSpr, 0, _xxx, _xyy, 1 * closeAnim, 1 * closeAnim, 0, c_white, 1);
+	
 }
 var _os = otherShowing;
 if _os != noone
@@ -475,9 +497,11 @@ if _os != noone
 
 	//loop through the inventory
 	for (var i = 0; i < _inv_length; i++) {
-		
 		//skip empty slots
 		if (_inv[i] == -1) continue;
+		
+		var _c = c_white;
+		if _inv[i].amount == 0 {_c = c_grey;}
 
 		var _page_index = _display_index div _os.invSlotsHeight;
 
@@ -497,7 +521,7 @@ if _os != noone
 				_isHover = true;//we are hovering
 			}
 			
-			if _isHover
+			if _isHover && _inv[i].amount != 0
 			{
 				hoveredItem = i;
 				
@@ -511,6 +535,17 @@ if _os != noone
 				if lmButton || rmButton
 				{
 					_iA = 0.98;
+					var _item = _inv[i];
+					if buyMultipleKey 
+					{
+						global.coins -= _inv[i].cost * min(_inv[i].amount, 5);
+						inventory_remove_other(i, _inv, 5);
+						inventory_add(_item, 5);
+					} else {
+						inventory_remove_other(i, _inv);
+						inventory_add(_item);
+						global.coins -= _inv[i].cost;
+					}
 				}
 				
 			} else {
@@ -525,7 +560,7 @@ if _os != noone
 			var _slot_cy = _yy + _slot_sh / 2;
 			
 			//draw the slots
-			draw_sprite_ext(slot, 0, _slot_cx, _slot_cy, _slot_xscale * _sizeMod, _slot_yscale * _sizeMod, 0, c_white, 1);
+			draw_sprite_ext(slot, 0, _slot_cx, _slot_cy, _slot_xscale * _sizeMod, _slot_yscale * _sizeMod, 0, _c, 1);
 			
 			//draw the items inside the slots
 			
@@ -536,14 +571,38 @@ if _os != noone
 			var _ixx = _start_x + sep*2;
 			var _iyy = _yy + _slot_sh / 2;
 			
-			draw_sprite_ext(_item_spr, 0, _ixx, _iyy, 1 * _sizeMod, 1 * _sizeMod, 0, c_white, 1);
+			draw_sprite_ext(_item_spr, 0, _ixx, _iyy, 1 /** _sizeMod*/, 1 /** _sizeMod*/, 0, _c, 1);
+			
+						
+			var _cost = _inv[i].cost;
+			
+			//draw the cost
+			var _cxx = _ixx + _sw + 10;
+			var _cyy = _iyy;
+			draw_set_valign(fa_middle);
+			var _cost_text = "$" + string(_cost);
+			draw_text(_cxx, _cyy, _cost_text);
+
+			
+			//draw the number you currently have in your inventory
+			var _item = _inv[i];
+			var _amt = get_item_amount(_item, global.inventory);
+			
+			var _string_w = string_width(_cost_text);
+			
+			var _amt_text = "Inventory: x" + string(_amt);
+			
+			draw_text(_xx + innerWidth - 32 - string_width(_amt_text), _cyy, _amt_text);
+			
+			//reset
+			draw_set_valign(fa_top);
 			
 			//draw the item quantity
 			var _quantity = _inv[i].amount;	
 			
 			var _inner_sep = 8;//the separation of the q-text from the slot border
-			var _qxx = _xx + _target_slot_width - _inner_sep;//quantity text x
-			var _qyy = _yy + _slot_sh - _inner_sep;//and y
+			var _qxx = _xx + _target_slot_width - _inner_sep - 4;//quantity text x
+			var _qyy = _yy + _slot_sh - _inner_sep - 4;//and y
 			
 			if _quantity > 1//only if more than 1
 			{
@@ -754,4 +813,26 @@ if _os != noone
 	//reset
 	draw_set_valign(fa_top);
 	draw_set_halign(fa_left);
+	
+	//top right X--------/
+	var _xsw = sprite_get_width(closeSpr);
+	var _xsh = sprite_get_height(closeSpr);
+	var _xxx = closeStartX + _xsw/2;
+	var _xyy = closeStartY + _xsh/2;
+	
+	if point_in_rectangle(_mouse_x, _mouse_y, _xxx - _xsw/2, _xyy - _xsh/2, _xxx + _xsw/2, _xyy + _xsh/2)
+	{
+		closeAnim = lerp(closeAnim, 1.1, 0.3);//lerp towards a bigger size
+				
+		if lmButton || rmButton
+		{
+			otherShowing = noone;
+			global.paused = false;
+		}				
+	} else {
+		closeAnim = lerp(closeAnim, 1, 0.5);//lerp towards 1, meaning no size change
+	}
+	
+	//close X
+	draw_sprite_ext(closeSpr, 0, _xxx, _xyy, 1 * closeAnim, 1 * closeAnim, 0, c_white, 1);
 }

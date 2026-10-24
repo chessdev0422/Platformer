@@ -60,6 +60,7 @@ function scr_get_controls()
 	//UI request inputs
 	acceptKey = keyboard_check_pressed(vk_space)// || gamepad_button_check_pressed(0, gp_face2);
 	
+	interactKey = keyboard_check_pressed(vk_space)// || gamepad_button_check_pressed(0, gp_face2);
 	
 	//Action inputs
 	jumpKeyPressed = keyboard_check_pressed(vk_space)// || gamepad_button_check_pressed(0, gp_face2); 
@@ -76,6 +77,8 @@ function scr_get_controls()
 	mapKey = keyboard_check_pressed(ord("M"))// || gamepad_button_check_pressed(0, gp_select);
 	
 	invKey = keyboard_check_pressed(ord("I"))// || gamepad_button_check_pressed(0, gp_face1);
+	
+	buyMultipleKey = keyboard_check(vk_shift)// || gamepad_button_check_pressed(0, gp_face3);
 	
 	//mouse inputs
 	lmButton = mouse_check_button_pressed(mb_left);

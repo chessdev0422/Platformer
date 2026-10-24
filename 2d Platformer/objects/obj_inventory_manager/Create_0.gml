@@ -25,7 +25,7 @@ global.item_list = {
 		items.wood, 
 		"Wood", 
 		"A nice, strong piece of lumber.", 
-		spr_item, 
+		spr_wood, 
 		item_categories.resources, 
 		99
 	),
@@ -34,7 +34,7 @@ global.item_list = {
 		items.chocolate,
 		"Chocolate",
 		"A piece of chocolate wrapped in purple.",
-		spr_item,
+		spr_chocolate_bar,
 		item_categories.consumables,
 		99,
 		"Consume_5"
@@ -234,3 +234,15 @@ sideBarWidth = 32;//width of the sidebar rectangle
 sideBarPad = 8;//the padding on the top and bottom between category icons
 
 //-------------//
+
+//top right X to close
+
+closeSpr = spr_close_ui;
+
+closeStartX = innerStartX + innerWidth + 32 + 32; //32 for the width of the tab and another 32
+
+closeStartY = innerStartY - 32; 
+
+closeAnim = 1;
+
+//

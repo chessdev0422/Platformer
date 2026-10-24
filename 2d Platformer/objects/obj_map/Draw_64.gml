@@ -1,4 +1,3 @@
-
 if !surface_exists(map_surface_bg)
 {
 	//create a new surface
@@ -91,6 +90,30 @@ if mapShowing {
 	
 	//reset the scissor
 	gpu_set_scissor(_scissor);
+	
+	var _mouse_x = device_mouse_x_to_gui(0);
+	var _mouse_y = device_mouse_y_to_gui(0);
+	
+	//top right X-------/
+	var _xsw = sprite_get_width(closeSpr);
+	var _xsh = sprite_get_height(closeSpr);
+	var _xxx = closeStartX + _xsw/2;
+	var _xyy = closeStartY + _xsh/2;
+	
+	if point_in_rectangle(_mouse_x, _mouse_y, _xxx - _xsw/2, _xyy - _xsh/2, _xxx + _xsw/2, _xyy + _xsh/2)
+	{
+		closeAnim = lerp(closeAnim, 1.1, 0.3);//lerp towards a bigger size
+				
+		if lmButton || rmButton
+		{
+			mapShowing = false;
+			global.paused = false;
+		}				
+	} else {
+		closeAnim = lerp(closeAnim, 1, 0.5);//lerp towards 1, meaning no size change
+	}
+	
+	draw_sprite_ext(closeSpr, 0, _xxx, _xyy, 1 * closeAnim, 1 * closeAnim, 0, c_white, 1);
 }
 
 if !mapShowing && !obj_inventory_manager.invShowing && !obj_inventory_manager.otherShowing //questsShowing etc

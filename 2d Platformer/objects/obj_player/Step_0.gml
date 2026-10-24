@@ -1,3 +1,15 @@
+scr_get_controls(); //access the controls
+
+
+//reset the jump before and after running interact code
+if (instance_exists(obj_textbox) || obj_inventory_manager.invShowing || obj_map.mapShowing || obj_inventory_manager.otherShowing)
+{
+    jumpKeyPressed = false;
+    jumpKeyBuffered = false;
+    jumpKeyBufferTimer = 0;
+}
+
+//testing / debugging -----------//
 if keyboard_check_pressed(ord("V"))
 {
 	var _cam_x = camera_get_view_x(view_camera[0]);
@@ -8,15 +20,39 @@ if keyboard_check_pressed(ord("V"))
 	var _random_y_offset = irandom(0 + _cam_h);
 	instance_create_depth(_cam_x + _random_x_offset, _cam_y + _random_y_offset, 0, obj_fireball);
 }
+//--------------//
 
-if keyboard_check_pressed(ord("T")) && !global.paused
+
+//interacting, run before everything else
+if onGround && interactKey && (!instance_exists(obj_textbox) && !obj_inventory_manager.invShowing && !obj_map.mapShowing)
 {
-	if obj_inventory_manager.otherShowing == noone
+	var _check_x = lengthdir_x(last_face, interactDist);
+	
+	var _inst = instance_place(x + _check_x, y - sprite_height/2, obj_interact);
+
+	if instance_exists(_inst)
 	{
-		obj_inventory_manager.otherShowing = inst_23232D55;
+		if interactInst == noone
+		{
+			interactInst = _inst;
+		} else {
+			interactInst = noone;
+		}
+	
+		with(_inst)
+		{
+			interacting = !interacting;
+		}
 	}
-	global.paused = true;
 }
+
+if (instance_exists(obj_textbox) || obj_inventory_manager.invShowing || obj_map.mapShowing || interactInst != noone)
+{
+    jumpKeyPressed = false;
+    jumpKeyBuffered = false;
+    jumpKeyBufferTimer = 0;
+}
+
 
 if instance_exists(obj_textbox)
 {
@@ -24,8 +60,6 @@ if instance_exists(obj_textbox)
 }
 
 if global.paused exit;
-
-scr_get_controls(); //access the controls
 
 scr_take_damage(obj_damage_player, true); //take damage from player damaging objects
 
@@ -204,7 +238,12 @@ ds_list_destroy(_list);
 	if instance_exists(_bottomWall)
 	{
 		var _bottomDist = bbox_bottom - y;
-		y = _bottomWall.bbox_top - _bottomDist;
+		var _targetY = _bottomWall.bbox_top - _bottomDist;
+		
+		if !place_meeting(x, _targetY, obj_wall)
+		{
+			y = _targetY;
+		}
 	}
 	
 	//top wall

@@ -69,6 +69,11 @@ function inventory_add(_item, _amount = 1) {
 		if _sorted == false
 		{
 			array_sort(global.inventory, function(_id_a, _id_b) {
+				
+				if (_id_a.item_id == _id_b.item_id) {
+					return _id_b.amount - _id_a.amount;
+				}
+				
 				return _id_a.item_id - _id_b.item_id;
 			})
 			_sorted = true;
@@ -78,7 +83,7 @@ function inventory_add(_item, _amount = 1) {
     }
 }
 
-function inventory_add_other(_slot_index, _inv, _max_stack, _item, _amount = 1) {
+function inventory_add_other(_slot_index, _inv, _item, _cost, _amount = 1) {
     
     //out of bounds
     if (_slot_index < 0 || _slot_index >= array_length(_inv)) {
@@ -90,7 +95,8 @@ function inventory_add_other(_slot_index, _inv, _max_stack, _item, _amount = 1) 
     var _desc = _item.description;
     var _icon = _item.icon;
     var _category = _item.category;
-    
+    var _max_stack = _item.max_stack;
+	
     var _slot = _inv[_slot_index];
     var remaining_amount = _amount;
 
@@ -106,7 +112,8 @@ function inventory_add_other(_slot_index, _inv, _max_stack, _item, _amount = 1) 
             icon: _icon,
             category: _category,
             amount: amount_to_add,
-            max_stack: _max_stack
+            max_stack: _max_stack,
+			cost: _cost
         };
         
         remaining_amount -= amount_to_add;
@@ -128,4 +135,52 @@ function inventory_add_other(_slot_index, _inv, _max_stack, _item, _amount = 1) 
 
     //return any items that couldn't fit
     return remaining_amount;
+}
+
+//removing items from the inventory
+function inventory_remove(_index, _amount = 1)
+{
+	for(var i = 0; i < array_length(global.inventory); i++;)
+	{
+		if i == _index {
+			show_debug_message("successful item deletion")
+			global.inventory[i].amount -= _amount;
+			global.inventory[i].amount = clamp(global.inventory[i].amount, 0, global.inventory[i].max_stack);
+			if global.inventory[i].amount == 0
+			{
+				array_delete(global.inventory, i, 1);
+			}
+			return _index;
+		}	
+	}
+	show_debug_message("item index out of bounds");
+	return _index;
+}
+
+function inventory_remove_other(_index, _inv, _amount = 1)
+{
+	for(var i = 0; i < array_length(_inv); i++;)
+	{
+		if i == _index {
+			show_debug_message("successful item deletion")
+			_inv[i].amount -= _amount;
+			_inv[i].amount = clamp(_inv[i].amount, 0, _inv[i].max_stack);
+			return _index;
+		}
+	}
+	show_debug_message("Item index out of bounds");
+	return _index; 
+}
+
+function get_item_amount(_item, _inv)
+{
+	var _item_count = 0;
+	for(var i = 0; i < array_length(_inv); i++)
+	{
+		if _inv[i] == _item
+		{
+			_item_count += _inv[i].amount;
+		}
+	}
+	return _item_count;
 }

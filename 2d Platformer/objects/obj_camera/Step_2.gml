@@ -4,12 +4,13 @@ scr_get_controls();
 
 if !instance_exists(follow) { exit; };	
 
-var _camWidth = camera_get_view_width(view_camera[0]);
-var _camHeight = camera_get_view_height(view_camera[0]);
-
 
 //X------------/
 var _target_look_ahead = follow.last_face * 48;
+
+
+var _camWidth = camera_get_view_width(view_camera[0]);
+var _camHeight = camera_get_view_height(view_camera[0]);
 
 look_ahead = lerp(look_ahead, _target_look_ahead, 0.2);
 
@@ -91,7 +92,7 @@ if (shake_remain > 0) {
     _final_x += random_range(-shake_remain, shake_remain);
     _final_y += random_range(-shake_remain, shake_remain);
     
-    // Reduce shake strength over time
+    //reduce shake strength over time
     shake_remain = max(0, shake_remain - ((1 / shake_length) * shake_magnitude));
 }
 

@@ -28,3 +28,7 @@ minimap_size_div = 3;
 
 minimap_pan_x = 0;
 minimap_pan_y = 0;
+
+closeSpr = spr_close_ui;
+closeStartX = map_x + map_width + 32;
+closeStartY = map_y;

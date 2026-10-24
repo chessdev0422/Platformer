@@ -46,7 +46,7 @@ if leftKeyPressed
 }
 
 
-if invKey && !obj_map.mapShowing && !instance_exists(obj_textbox) 
+if invKey && !obj_map.mapShowing && !instance_exists(obj_textbox) && otherShowing == noone
 {
 	invShowing = !invShowing;
 	global.paused = !global.paused;
