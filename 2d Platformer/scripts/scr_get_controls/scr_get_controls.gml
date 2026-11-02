@@ -63,9 +63,9 @@ function scr_get_controls()
 	interactKey = keyboard_check_pressed(vk_space)// || gamepad_button_check_pressed(0, gp_face2);
 	
 	//Action inputs
-	jumpKeyPressed = keyboard_check_pressed(vk_space)// || gamepad_button_check_pressed(0, gp_face2); 
+	jumpKeyPressed = keyboard_check_pressed(ord("W"))// || gamepad_button_check_pressed(0, gp_face2); 
 	
-	jumpKeyHeld = keyboard_check(vk_space)// || gamepad_button_check(0, gp_face2); 
+	jumpKeyHeld = keyboard_check(ord("W"))// || gamepad_button_check(0, gp_face2); 
 	
 	runKey = keyboard_check(vk_shift)// || gamepad_button_check(0, gp_face3);
 

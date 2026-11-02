@@ -23,19 +23,9 @@ x += (xTo - x) / 3;
 
 
 //Y------------/
-var _target_up_down_amt = 0;
-
-if upKey && follow.onGround && follow.xspd == 0 {
-	_target_up_down_amt = -64;
-}
-if downKey && follow.onGround && follow.xspd == 0 {
-	_target_up_down_amt = 64 + follow.sprite_height;
-}
-
-up_down_amt = lerp(up_down_amt, _target_up_down_amt, 0.2);
 
 
-yTo = follow.y - _camHeight/2 - follow.sprite_height - 2 + up_down_amt;
+yTo = follow.y - _camHeight/2 - follow.sprite_height - 2;
 
 
 

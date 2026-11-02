@@ -25,8 +25,10 @@ function scr_knockback(_x, _y, _strength_x, _strength_y)
 {
 	if (x > _x) {
         xspd = _strength_x;
+		last_face = -1;
     } else {
         xspd = -_strength_x;
+		last_face = 1;
     }
     
     yspd = -_strength_y;

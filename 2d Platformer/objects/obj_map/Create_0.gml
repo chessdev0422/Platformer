@@ -32,3 +32,4 @@ minimap_pan_y = 0;
 closeSpr = spr_close_ui;
 closeStartX = map_x + map_width + 32;
 closeStartY = map_y;
+closeAnim = 1;

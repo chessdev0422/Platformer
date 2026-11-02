@@ -70,7 +70,6 @@ if knockBackTimer > 0
 	scr_knockback(knockBackX, knockBackY, knockBackStrengthX, knockBackStrengthY); //run the knockback script
 }
 
-
 if damageShaderTimer > 0
 {
 	damageShaderTimer--;
@@ -92,7 +91,7 @@ var _damaged = iframeTimer > 0; //if we were just damaged, we are unable to jump
 //show_debug_message(pogoBounce);
 
 //--------pogos------------//
-if pogoKeyBuffered && !onGround && !pogoBounce && pogoWaitTimer <= 0 && !_damaged//if we have attempted to initate a pogo and are not on the ground, not already successful
+if pogoKeyBuffered && !onGround && pogoBounceTimer <= 0 && pogoWaitTimer <= 0 && !_damaged
 {
 	scr_pogo();//check for a pogo
 }
@@ -102,37 +101,52 @@ if pogoWaitTimer > 0
 	pogoWaitTimer--;//subtract from the timer	
 }
 
-//on ground
-	if pogoBounce
-	{
-		yspd = pogoSpd;//set the player jumping
-		
-		pogoKeyBuffered = false;//reset
-		pogoBounce = false;
-		pogoBounceBufferTimer = 0;
-		
-		pogoHoldTimer = pogoHoldFrames;//start the timer for how long the pogo button has been held
-		onGround = false; //reset everything when jumping
-		coyoteHangTimer = 0;
-		coyoteJumpTimer = 0;
-		currentFloor = noone;//VERY important to reset or wont be able to jump
-		
-		pogoWaitTimer = pogoWaitFrames;//start the counter to not be able pogo until
-	}
-			
-		//cut off the pogo when the button is released
-		if !pogoKeyHeld
-		{
-			pogoHoldTimer = 0;
-		}
+// Trigger pogo wind-up/animation phase
+if pogoBounce && pogoBounceTimer <= 0
+{
+	pogoBounceTimer = pogoBounceFrames;
+	xspd = 0;
+	yspd = 0;
 	
-		if pogoHoldTimer > 0
-		{
-			//constantly set the yspd to be the pogo-ing speed
-			yspd = pogoSpd;
-			//count down the timer
-			pogoHoldTimer--;
-		} 
+	pogoKeyBuffered = false;
+	pogoBounce = false;
+	pogoBounceBufferTimer = 0;
+}
+
+// Count down the animation timer before applying bounce physics
+if pogoBounceTimer > 0
+{
+	pogoBounceTimer--;
+	yspd = 0;
+	
+	if pogoBounceTimer == 0
+	{
+		yspd = pogoSpd; // Launch player upward
+		
+		pogoHoldTimer = pogoHoldFrames;
+		onGround = false;
+		coyoteHangTimer = pogoHoldFrames; // Prevent gravity from immediately canceling the yspd burst
+		coyoteJumpTimer = 0;
+		currentFloor = noone;
+		
+		pogoWaitTimer = pogoWaitFrames;
+	}
+}
+		
+//cut off the extra pogo hold height when the button is released
+if !pogoKeyHeld
+{
+	pogoHoldTimer = 0;
+}
+
+if pogoHoldTimer > 0
+{
+	//constantly set the yspd to be the pogo-ing speed while held
+	yspd = pogoSpd;
+	//count down the timer
+	pogoHoldTimer--;
+}
+
 
 #region moving and collisions
 //------------wall jump and slide checks-------/
@@ -342,11 +356,16 @@ if wallJumpTimer > 0
 		xspd = 0; //set xspd to 0 to "collide"
 		wallJumpTimer = 0;//reset the wall jump timer so we stop ignoring the x movement
 	}
+	
+if (sprite_index == landSprDist) && image_index < image_number - 1 {xspd = 0;};
+
 //move the player in the x
 x += xspd;	
 
 //Y movement
 
+if pogoBounceTimer <= 0
+{
 	if coyoteHangTimer > 0
 	{
 		//subtract from the coyote hang timer
@@ -357,7 +376,8 @@ x += xspd;
 			onGround = false;
 			coyoteHangTimer = 0;
 	}
-	
+}
+
 	//cap the yspd based on the terminal vel
 	if yspd > terminal_vel[_touchingWall] {yspd = terminal_vel[_touchingWall]};
 	
@@ -433,6 +453,7 @@ x += xspd;
 	
 		//on ground
 		if jumpKeyBuffered && jumpCount < maxJump && !_touchingWall /*touching wall being sliding*/ && !crouching && !_damaged
+		&& !((sprite_index == landSprDist) && image_index < image_number - 1)
 		{
 			yspd = jumpSpd[0];//set the player jumping
 		
@@ -744,22 +765,85 @@ if instance_exists(forgetSemiSolidWall) && !place_meeting(x, y, forgetSemiSolidW
 
 //sprite control------------/
 
-//walking
-if abs(xspd) > 0 {sprite_index = walkSpr[moveType];};
+image_speed = 1;
 
-//idle
-if xspd == 0 {sprite_index = idleSpr;};
+var _wasOnGround = onGround;
+var _lookAheadDist = max(4, yspd * 3.5); 
 
-//in the air
-if !onGround {sprite_index = jumpSpr;};
+var _solidMeeting = place_meeting(x, y + yspd + _lookAheadDist, obj_wall);
 
-if _touchingWall {sprite_index = slideSpr}
+var _semiSolidMeeting = false;
+var _list = ds_list_create();
+var _num = instance_place_list(x, y + yspd + _lookAheadDist, obj_semi_solid_wall, _list, false);
+if (_num > 0) {
+    for (var i = 0; i < _num; i++) {
+        var _inst = _list[| i];
+        if (bbox_bottom <= _inst.bbox_top) {
+            _semiSolidMeeting = true;
+            break;
+        }
+    }
+}
+ds_list_destroy(_list);
 
-//crouching
-if crouching = true {sprite_index = crouchSpr;};
+var _aboutToLand = (!onGround && yspd > 0 && (_solidMeeting || _semiSolidMeeting));
 
-//pogo-ing
-if pogoBounce ||  pogoHoldTimer > 0 {sprite_index = pogoSpr;}
+var _justStartedLanding = (!_wasOnGround && onGround);
+var _aboutToStartLanding = (_aboutToLand && sprite_index != landSpr && sprite_index != landSprDist);
+
+if (_justStartedLanding || _aboutToStartLanding) {
+    if (yspd >= terminal_vel[0]) {
+        sprite_index = landSprDist;
+    } 
+    else {
+        sprite_index = landSpr;
+    }
+    image_index = 0;
+}
+
+if knockBackTimer > 0 {
+    sprite_index = knockbackSpr;
+}
+else if pogoBounceTimer > 0 {
+	//pogo-ing
+    if (sprite_index != pogoSpr) {
+        sprite_index = pogoSpr;
+        image_index = 0;
+	}
+    
+    if (image_index >= image_number - 1) {
+        image_index = image_number - 1;
+        image_speed = 0;
+    }
+}
+else if _touchingWall {
+    sprite_index = slideSpr;
+}
+else if crouching = true {
+    //crouching
+    sprite_index = crouchSpr;
+}
+else if (sprite_index == landSpr || sprite_index == landSprDist) && image_index < image_number - 1 {
+    //ensure that the landing plays all the way through
+}
+else if !onGround {
+    //in the air
+    if yspd < 0 {
+        sprite_index = jumpSpr;
+    }
+    else {
+        sprite_index = fallSpr;
+    }
+}
+else if abs(xspd) > 0 {
+    sprite_index = walkSpr[moveType];
+}
+else if xspd == 0 {
+    //idle
+    sprite_index = idleSpr;
+}
+
+show_debug_message(sprite_index)
 
 //attacking
 

@@ -47,17 +47,19 @@ yspd = 0;
 //jumping---------------/
 grav = 0.35; //gravity
 
-terminal_vel[0] = 8; //cap the max falling speed
+terminal_vel[0] = 16; //cap the max falling speed
 terminal_vel[1] = 2;//the slide speed when touching a wall
 
 
 jumpSpd[0] = -7; //speed player jumps at
 jumpSpd[1] = -12//when bouncing
 
-pogoSpd = -5;//force upwards after a pogo
+pogoSpd = jumpSpd[0];//force upwards after a pogo
 pogoWaitTimer = 0;
-pogoWaitFrames = 60/2;//1/2 seconds to wait before the next pogo attempt
+pogoWaitFrames = 60;//1 seconds to wait before the next pogo attempt
 pogoBounce = false;
+pogoBounceTimer = 0;
+pogoBounceFrames = 1/3 * 60;//7 frames, 35 fps
 
 
 #macro BOUNCING 1 //bouncing
@@ -94,16 +96,21 @@ coyoteJumpTimer = 0;
 
 //sprite control-----------/
 last_face = 1;
-maskSpr = spr_player;
-crouchMaskSpr = spr_player;
-idleSpr = spr_player;
-walkSpr[0] = spr_player;
-walkSpr[1] = spr_player; 
-jumpSpr = spr_player;
-attackSpr = spr_player;
-crouchSpr = spr_player;
-slideSpr = spr_player;
-pogoSpr = spr_player;
+maskSpr = spr_player_idle;
+crouchMaskSpr = spr_player_crouching
+idleSpr = spr_player_idle;
+walkSpr[0] = spr_player_walking;
+walkSpr[1] = spr_player_running; 
+jumpSpr = spr_player_jumping;
+fallSpr = spr_player_falling
+landSpr = spr_player_landing;
+landSprDist = spr_player_landing_distance;
+attackSpr = spr_player_idle;
+crouchSpr = spr_player_crouching;
+slideSpr = spr_player_wall_slide;
+pogoSpr = spr_player_pogo;
+knockbackSpr = spr_player_knockback;
+deathSpr = spr_player_death;
 
 //state variables
 crouching = false;

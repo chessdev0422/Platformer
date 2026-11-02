@@ -25,7 +25,7 @@ function save_room()
 	var _cameraNumber = instance_number(obj_camera);
 	var _wallNumber = instance_number(obj_moving_wall);
 	var _semiWallNumber = instance_number(obj_semi_solid_moving_wall);
-	var _enemyNumber = instance_number(obj_enemy);
+	var _enemyNumber = instance_number(obj_wall_worm);
 	var _projNumber = instance_number(obj_projectile);
 	var _interactNumber = instance_number(obj_interact);
 	
@@ -104,7 +104,7 @@ function save_room()
 	//enemies
 	for (var i = 0; i < _enemyNumber; i ++)
 	{
-		var enemy_inst = instance_find(obj_enemy, i)
+		var enemy_inst = instance_find(obj_wall_worm, i)
 			
 		_roomStruct.enemyData[i] = 
 		{
@@ -216,7 +216,7 @@ function load_room()
 	}
 	
 	//enemies
-	if instance_exists(obj_enemy) {instance_destroy(obj_enemy);};
+	if instance_exists(obj_wall_worm) {instance_destroy(obj_wall_worm);};
 	
 	for (var i = 0; i < _roomStruct.enemyNumber; i++)
 	{
