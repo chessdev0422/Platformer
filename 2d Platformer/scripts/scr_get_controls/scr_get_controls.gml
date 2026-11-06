@@ -7,10 +7,8 @@ function scr_controls_setup()
 	jumpKeyBuffered = false;
 	jumpKeyBufferTimer = 0;
 	
-	pogoKeyBuffered = false;
-	
-	pogoBounceBufferTimer = 0;
-	pogoBounceBufferTime = 10;
+	attackKeyBuffered = false;
+	attackKeyBufferTimer = 0;
 }
 
 
@@ -29,7 +27,7 @@ function scr_get_controls()
 	downKey = keyboard_check(ord("S"))// + sign(gamepad_axis_value(0, gp_axisrv));
 	downKey = clamp(downKey, 0, 1);
 	
-	upKey = keyboard_check(ord("W"))// + sign(gamepad_axis_value(0, gp_axislv));
+	upKey = keyboard_check(ord("E"))// + sign(gamepad_axis_value(0, gp_axislv));
 	upKey = clamp(upKey, 0, 1);
 	
 	
@@ -53,7 +51,7 @@ function scr_get_controls()
 	
 	//var _up_stick_pressed = global.axis_lv_curr > 0.5 && global.axis_lv_prev <= 0.5;
 	
-	upKeyPressed = keyboard_check_pressed(ord("W"))// + sign(_up_stick_pressed);
+	upKeyPressed = keyboard_check_pressed(ord("E"))// + sign(_up_stick_pressed);
 	upKeyPressed = clamp(upKeyPressed, 0, 1);
 	
 	
@@ -68,10 +66,10 @@ function scr_get_controls()
 	jumpKeyHeld = keyboard_check(ord("W"))// || gamepad_button_check(0, gp_face2); 
 	
 	runKey = keyboard_check(vk_shift)// || gamepad_button_check(0, gp_face3);
-
-	pogoKeyPressed = keyboard_check_pressed(vk_shift)// || gamepad_button_check_pressed(0, gp_face3);
 	
-	pogoKeyHeld = keyboard_check(vk_shift)// || gamepad_button_check(0, gp_face3);
+	attackKey = keyboard_check_pressed(ord("X")) || mouse_check_button_pressed(mb_right); // || gamepad_button_check_pressed(0, gp_face0);
+	
+	attackKeyHeld = keyboard_check(ord("X")); // || gamepad_button_check(0, gp_face0);
 	
 	//UI inputs
 	mapKey = keyboard_check_pressed(ord("M"))// || gamepad_button_check_pressed(0, gp_select);
@@ -100,17 +98,17 @@ function scr_get_controls()
 			jumpKeyBuffered = false;
 		}
 		
-		//jump key buffering
-		if pogoKeyPressed
+		//attack key buffering
+		if attackKey
 		{
-			pogoBounceBufferTimer = pogoBounceBufferTime;
+			attackKeyBufferTimer = bufferTime;
 		}
-		if pogoBounceBufferTimer > 0
+		if attackKeyBufferTimer > 0
 		{
-			pogoKeyBuffered = true;
-			pogoBounceBufferTimer--;
+			attackKeyBuffered = true;
+			attackKeyBufferTimer--;
 		} else {
-			pogoKeyBuffered = false;
+			attackKeyBuffered = false;
 		}
 	}
 }

@@ -48,7 +48,7 @@ draw_clear_alpha(c_black, 0.0); //clear transparent
 if (instance_exists(obj_player)) {
 	//origin is bottom centre
 	var p_x = obj_player.x;
-	var p_y = obj_player.y - (obj_player.sprite_height/2.5);
+	var p_y = obj_player.y - (global.player_sprite_height/2.5);
 	
 	//draw the dot
 	draw_set_color(c_red);

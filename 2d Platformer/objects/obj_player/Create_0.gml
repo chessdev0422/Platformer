@@ -44,6 +44,11 @@ moveSpd[1] = 5;//speed player moves at when running
 xspd = 0; //current speed on x and y values
 yspd = 0;
 
+//acceleration - friction
+target_xspd = 0; //the target speed on the x axis
+accel = 0.2; //acceleration (amount to be interpolated by each step)
+ff = 1; //force of friction (amount to be interpolated by each step)
+
 //jumping---------------/
 grav = 0.35; //gravity
 
@@ -53,13 +58,6 @@ terminal_vel[1] = 2;//the slide speed when touching a wall
 
 jumpSpd[0] = -7; //speed player jumps at
 jumpSpd[1] = -12//when bouncing
-
-pogoSpd = jumpSpd[0];//force upwards after a pogo
-pogoWaitTimer = 0;
-pogoWaitFrames = 60;//1 seconds to wait before the next pogo attempt
-pogoBounce = false;
-pogoBounceTimer = 0;
-pogoBounceFrames = 1/3 * 60;//7 frames, 35 fps
 
 
 #macro BOUNCING 1 //bouncing
@@ -71,14 +69,10 @@ jumpHoldTimer = 0;//a timer for how long jump button has been held
 jumpHoldFrames[0] = 20;//the amount of frames the player can hold the jump input for variable jump height
 jumpHoldFrames[1] = 10;//an array for each jumpCount of course
 
-pogoHoldTimer = 0;
-pogoHoldFrames = jumpHoldFrames[1]; //same strength as the second jump
-
 wallJumpBufferTimer = 0;//buffer frames when wall jumping
 wallJumpBufferFrames = 6;
 
 onGround = true;//whether or not the player has solid ground directly beneath them
-
 
 wallSliding = false;
 wallJumpTimer = 0;
@@ -102,15 +96,20 @@ idleSpr = spr_player_idle;
 walkSpr[0] = spr_player_walking;
 walkSpr[1] = spr_player_running; 
 jumpSpr = spr_player_jumping;
+apexSpr = spr_player_jumping_apex;
 fallSpr = spr_player_falling
 landSpr = spr_player_landing;
 landSprDist = spr_player_landing_distance;
-attackSpr = spr_player_idle;
 crouchSpr = spr_player_crouching;
 slideSpr = spr_player_wall_slide;
-pogoSpr = spr_player_pogo;
 knockbackSpr = spr_player_knockback;
 deathSpr = spr_player_death;
+attackSpr1 = spr_player_attack_1;
+attackSpr2 = spr_player_attack_2;
+attackSprWide = spr_player_wide_attack;
+attackSprUp = spr_player_up_attack;
+attackSprDown = spr_player_down_attack;
+attackSprJump = spr_player_jump_up_attack;
 
 //state variables
 crouching = false;
@@ -142,6 +141,42 @@ knockBackStrengthY = 5;//the strength the player will be knocked back with on th
 knockBackTimer = 0;
 knockBackFrames = 20;//length of the knockback
 
+
+//attacking - combos - running attacks - air attacks
+
+isAttacking = false; //whether or not we are attacking
+
+canAttack = true; //can we attack? i.e. on the ground, or in the air and haven't used up and attack
+//or used up all of the combos, or actively playing an attack, etc
+
+//create an attack enum
+enum attacks {
+	attack_1,
+	attack_2,
+	wide_attack,
+	up_attack,
+	jump_up_attack,
+	down_attack,
+	//charge_attack,
+}
+
+//combos
+currentAttack = attacks.attack_1; //store the current attack
+currentCombo = 0;
+comboQueued = false;
+maxCombo = 3;//the final attack in the sequence (third attack)
+comboHitFrames = bufferTime;
+comboLostTimer = 0;
+comboLostFrames = 10;
+
+//recovery time
+afterAttackRecoveryTimer = 0;
+afterAttackRecoveryFrames = 15; //15 (1/4 second) frames of a recovery period after a normal attack (assuming missed combo)
+finalAttackRecoveryTimer = 0;
+finalAttackRecoveryFrames = 1*60; //1 seconds of a recovery period after a final wide attack in a sequence (or running attack)
+
+
+//-----------------//
 
 //interacting
 interactDist = 4;

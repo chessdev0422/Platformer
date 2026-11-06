@@ -25,7 +25,7 @@ function save_room()
 	var _cameraNumber = instance_number(obj_camera);
 	var _wallNumber = instance_number(obj_moving_wall);
 	var _semiWallNumber = instance_number(obj_semi_solid_moving_wall);
-	var _enemyNumber = instance_number(obj_wall_worm);
+	var _enemyNumber = instance_number(obj_enemy);
 	var _projNumber = instance_number(obj_projectile);
 	var _interactNumber = instance_number(obj_interact);
 	
@@ -104,13 +104,14 @@ function save_room()
 	//enemies
 	for (var i = 0; i < _enemyNumber; i ++)
 	{
-		var enemy_inst = instance_find(obj_wall_worm, i)
+		var enemy_inst = instance_find(obj_enemy, i)
 			
 		_roomStruct.enemyData[i] = 
 		{
 			x : enemy_inst.x,
 			y : enemy_inst.y,
 			type : enemy_inst.object_index,
+			wall_dir : enemy_inst.wall_dir,
 		}
 	}
 	
@@ -216,11 +217,15 @@ function load_room()
 	}
 	
 	//enemies
-	if instance_exists(obj_wall_worm) {instance_destroy(obj_wall_worm);};
+	if instance_exists(obj_enemy) {instance_destroy(obj_enemy);};
 	
 	for (var i = 0; i < _roomStruct.enemyNumber; i++)
 	{
-		instance_create_depth(_roomStruct.enemyData[i].x, _roomStruct.enemyData[i].y,  0, _roomStruct.enemyData[i].type);
+		var _enemy_inst = instance_create_depth(_roomStruct.enemyData[i].x, _roomStruct.enemyData[i].y,  0, _roomStruct.enemyData[i].type);
+		with(_enemy_inst)
+		{
+			wall_dir = _roomStruct.enemyData[i].wall_dir;
+		};
 	}
 	
 	//projectiles

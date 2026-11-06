@@ -827,7 +827,8 @@ if _os != noone
 		if lmButton || rmButton
 		{
 			otherShowing = noone;
-			global.paused = false;
+			global.paused = !global.paused;
+			obj_player.interactInst = noone;
 		}				
 	} else {
 		closeAnim = lerp(closeAnim, 1, 0.5);//lerp towards 1, meaning no size change
@@ -836,3 +837,6 @@ if _os != noone
 	//close X
 	draw_sprite_ext(closeSpr, 0, _xxx, _xyy, 1 * closeAnim, 1 * closeAnim, 0, c_white, 1);
 }
+
+	
+//show_debug_message(global.paused);

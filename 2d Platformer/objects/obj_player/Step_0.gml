@@ -1,5 +1,6 @@
 scr_get_controls(); //access the controls
 
+mask_index = maskSpr;
 
 //reset the jump before and after running interact code
 if (instance_exists(obj_textbox) || obj_inventory_manager.invShowing || obj_map.mapShowing || obj_inventory_manager.otherShowing)
@@ -29,6 +30,8 @@ if onGround && interactKey && (!instance_exists(obj_textbox) && !obj_inventory_m
 	var _check_x = lengthdir_x(last_face, interactDist);
 	
 	var _inst = instance_place(x + _check_x, y - sprite_height/2, obj_interact);
+
+	//show_debug_message(_inst);
 
 	if instance_exists(_inst)
 	{
@@ -61,6 +64,98 @@ if instance_exists(obj_textbox)
 
 if global.paused exit;
 
+
+//attacking ------------------- /
+//reference anim end event
+#region attacking
+if (canAttack && !isAttacking && attackKeyBuffered)
+{
+    attackKeyBuffered = false;
+    isAttacking = true;
+    
+	if (onGround)
+    {
+        if (upKey)
+        {
+            currentAttack = attacks.up_attack;
+            image_index = 0;
+        }
+        else if (moveType == 1 && abs(xspd) >= (moveSpd[1]))
+        {
+            currentAttack = attacks.wide_attack;
+            image_index = 0;
+        }
+        else
+        {
+            if (currentCombo == 0)
+            {
+                currentAttack = attacks.attack_1;
+                image_index = 0;
+            }
+            else if (currentCombo == 1)
+            {
+                currentAttack = attacks.attack_2;
+                image_index = 0;
+            }
+            else if (currentCombo >= 2)
+            {
+                currentAttack = attacks.wide_attack;
+                image_index = 0;
+            }
+        }
+    }
+    else
+    {
+        if (downKey)
+        {
+            currentAttack = attacks.down_attack;
+            image_index = 0;
+        }
+        else if (upKey)
+        {
+            currentAttack = attacks.jump_up_attack;
+            image_index = 0;
+        }
+        else
+        {
+            currentAttack = attacks.wide_attack;
+            image_index = 0;
+        }
+    }
+}
+
+if (isAttacking)
+{
+    xspd = 0;
+}
+
+if (currentCombo > 0 && !isAttacking)
+{
+    comboLostTimer++;
+    if (comboLostTimer >= comboLostFrames)
+    {
+        currentCombo = 0;
+        comboLostTimer = 0;
+    }
+}
+
+if (afterAttackRecoveryTimer > 0)
+{
+    afterAttackRecoveryTimer--;
+    if (afterAttackRecoveryTimer <= 0) {
+        canAttack = true;
+    }
+}
+
+if (finalAttackRecoveryTimer > 0)
+{
+    finalAttackRecoveryTimer--;
+    if (finalAttackRecoveryTimer <= 0) {
+        canAttack = true;
+    }
+}
+#endregion
+
 scr_take_damage(obj_damage_player, true); //take damage from player damaging objects
 
 //knockback
@@ -87,65 +182,6 @@ if global.hitPauseTimer > 0
 if global.hitPause exit; //don't run any of the rest of the step event if hit "pausing"
 
 var _damaged = iframeTimer > 0; //if we were just damaged, we are unable to jump, pogo, etc
-
-//show_debug_message(pogoBounce);
-
-//--------pogos------------//
-if pogoKeyBuffered && !onGround && pogoBounceTimer <= 0 && pogoWaitTimer <= 0 && !_damaged
-{
-	scr_pogo();//check for a pogo
-}
-
-if pogoWaitTimer > 0
-{
-	pogoWaitTimer--;//subtract from the timer	
-}
-
-// Trigger pogo wind-up/animation phase
-if pogoBounce && pogoBounceTimer <= 0
-{
-	pogoBounceTimer = pogoBounceFrames;
-	xspd = 0;
-	yspd = 0;
-	
-	pogoKeyBuffered = false;
-	pogoBounce = false;
-	pogoBounceBufferTimer = 0;
-}
-
-// Count down the animation timer before applying bounce physics
-if pogoBounceTimer > 0
-{
-	pogoBounceTimer--;
-	yspd = 0;
-	
-	if pogoBounceTimer == 0
-	{
-		yspd = pogoSpd; // Launch player upward
-		
-		pogoHoldTimer = pogoHoldFrames;
-		onGround = false;
-		coyoteHangTimer = pogoHoldFrames; // Prevent gravity from immediately canceling the yspd burst
-		coyoteJumpTimer = 0;
-		currentFloor = noone;
-		
-		pogoWaitTimer = pogoWaitFrames;
-	}
-}
-		
-//cut off the extra pogo hold height when the button is released
-if !pogoKeyHeld
-{
-	pogoHoldTimer = 0;
-}
-
-if pogoHoldTimer > 0
-{
-	//constantly set the yspd to be the pogo-ing speed while held
-	yspd = pogoSpd;
-	//count down the timer
-	pogoHoldTimer--;
-}
 
 
 #region moving and collisions
@@ -288,9 +324,14 @@ if instance_exists(currentFloor) && currentFloor.xspd != 0 && !place_meeting(x, 
 
 //Crouching---------/
 	//transition to crouch
-	if onGround && (downKey || place_meeting(x, y, obj_wall))
+	if onGround && (downKey || place_meeting(x, y, obj_wall))  && !((sprite_index == landSprDist || sprite_index == landSpr) && image_index < image_number - 1)
 	{
 		crouching = true;
+	}
+	
+	if knockBackTimer > 0
+	{
+		crouching = false;	
 	}
 	
 	if crouching {mask_index = crouchMaskSpr;};
@@ -323,7 +364,7 @@ if wallJumpTimer > 0
 		yspd = 0;
 	}
 } else {
-	if knockBackTimer <= 0
+	if knockBackTimer <= 0 && !isAttacking //lock the face (not attacking or being knocked back)
 	{
 		//direction
 		face = rightKey - leftKey;
@@ -334,11 +375,23 @@ if wallJumpTimer > 0
 		}
 	
 		//set xspd
-		xspd = face * moveSpd[moveType];
+		target_xspd = face * moveSpd[moveType];
 	
 		if face != 0 {last_face = face;};
 	}
 }
+
+
+//Apply acceleration ---- / //IMPORTANT, Before collisions
+var _target_accel = 0;
+if face != 0
+{
+	_target_accel = accel; //acceleration
+} else {
+	_target_accel = ff; //friction
+}
+xspd = lerp(xspd, target_xspd, _target_accel); //lerp
+
 	//X collision ----- /
 	
 	//scoot right up to the wall
@@ -358,24 +411,24 @@ if wallJumpTimer > 0
 	}
 	
 if (sprite_index == landSprDist) && image_index < image_number - 1 {xspd = 0;};
+if instance_exists(obj_textbox) {xspd = 0;};
+if crouching {xspd = 0;};
 
 //move the player in the x
-x += xspd;	
+x += xspd;
+//show_debug_message(xspd);
+//show_debug_message(moveSpd[1]);
 
 //Y movement
-
-if pogoBounceTimer <= 0
+if coyoteHangTimer > 0
 {
-	if coyoteHangTimer > 0
-	{
-		//subtract from the coyote hang timer
-		coyoteHangTimer--;
-	} else { 
-			//gravity, only if coyote hang timer <= 0
-			yspd += grav;
-			onGround = false;
-			coyoteHangTimer = 0;
-	}
+	//subtract from the coyote hang timer
+	coyoteHangTimer--;
+} else { 
+		//gravity, only if coyote hang timer <= 0
+		yspd += grav;
+		onGround = false;
+		coyoteHangTimer = 0;
 }
 
 	//cap the yspd based on the terminal vel
@@ -460,6 +513,11 @@ if pogoBounceTimer <= 0
 			jumpKeyBuffered = false;//reset
 			jumpKeyBufferTimer = 0;
 		
+			if jumpCount > 0
+			{
+				instance_create_depth(x, y, 0, obj_double_jump_effect);	
+			}
+			
 			jumpCount++;//increase the number of jumps
 		
 			jumpHoldTimer = jumpHoldFrames[jumpCount-1];//start the timer for how long the jump button has been held
@@ -470,12 +528,13 @@ if pogoBounceTimer <= 0
 			currentFloor = noone;//VERY important to reset or wont be able to jump
 		}
 		
-		//bouncy pads
+		/*//bouncy pads
 		if instance_exists(currentFloor) && (currentFloor.object_index == obj_bouncy_pad || object_is_ancestor(currentFloor.object_index, obj_bouncy_pad))
 		{
 			yspd = jumpSpd[BOUNCING];
 		
 			jumpKeyBuffered = false;//reset
+			//set it so the player knows they are taking off
 			jumpKeyBufferTimer = 0;
 		
 			jumpCount++;//increase the number of jumps
@@ -486,7 +545,7 @@ if pogoBounceTimer <= 0
 			coyoteHangTimer = 0;
 			coyoteJumpTimer = 0;
 			currentFloor = noone;//VERY important to reset or wont be able to jump
-		}
+		}*/
 			
 			//cut off the jump when the button is released
 			if !jumpKeyHeld
@@ -589,7 +648,6 @@ if pogoBounceTimer <= 0
 		{
 			onGround = true;
 			coyoteHangTimer = coyoteHangFrames;
-			pogoWaitTimer = 0;
 		}
 		
 		//land on the ground platform if there is one
@@ -617,7 +675,6 @@ if pogoBounceTimer <= 0
 				//set on ground to be true
 				onGround = true;
 				coyoteHangTimer = coyoteHangFrames;
-				pogoWaitTimer = 0;
 			}
 	
 		//manually fall through a semi-solid platform
@@ -791,7 +848,37 @@ var _aboutToLand = (!onGround && yspd > 0 && (_solidMeeting || _semiSolidMeeting
 var _justStartedLanding = (!_wasOnGround && onGround);
 var _aboutToStartLanding = (_aboutToLand && sprite_index != landSpr && sprite_index != landSprDist);
 
-if (_justStartedLanding || _aboutToStartLanding) {
+if isAttacking == true
+{
+	switch(currentAttack)
+	{
+		case attacks.attack_1:
+		sprite_index = attackSpr1;
+		break;
+		
+		case attacks.attack_2:
+		sprite_index = attackSpr2;
+		break;
+		
+		case attacks.wide_attack:
+		sprite_index = attackSprWide;
+		break;
+		
+		case attacks.up_attack:
+		sprite_index = attackSprUp;
+		break;
+		
+		case attacks.down_attack:
+		sprite_index = attackSprDown;
+		break;
+		
+		case attacks.jump_up_attack:
+		sprite_index = attackSprJump;
+		break;
+	}
+	show_debug_message(sprite_index);
+} 
+else if (_justStartedLanding || _aboutToStartLanding) {
     if (yspd >= terminal_vel[0]) {
         sprite_index = landSprDist;
     } 
@@ -800,21 +887,8 @@ if (_justStartedLanding || _aboutToStartLanding) {
     }
     image_index = 0;
 }
-
-if knockBackTimer > 0 {
+else if knockBackTimer > 0 {
     sprite_index = knockbackSpr;
-}
-else if pogoBounceTimer > 0 {
-	//pogo-ing
-    if (sprite_index != pogoSpr) {
-        sprite_index = pogoSpr;
-        image_index = 0;
-	}
-    
-    if (image_index >= image_number - 1) {
-        image_index = image_number - 1;
-        image_speed = 0;
-    }
 }
 else if _touchingWall {
     sprite_index = slideSpr;
@@ -832,19 +906,29 @@ else if !onGround {
         sprite_index = jumpSpr;
     }
     else {
-        sprite_index = fallSpr;
+        if (sprite_index == jumpSpr) {
+            sprite_index = apexSpr;
+            image_index = 0;
+        }
+        
+        if (sprite_index == apexSpr) {
+            if (image_index >= image_number - 1) {
+                sprite_index = fallSpr;
+            }
+        }
+        else {
+            sprite_index = fallSpr;
+        }
     }
 }
-else if abs(xspd) > 0 {
+else if abs(xspd) > 0.1 {
     sprite_index = walkSpr[moveType];
 }
-else if xspd == 0 {
+else if abs(xspd) <= 0.1 {
     //idle
     sprite_index = idleSpr;
 }
 
-show_debug_message(sprite_index)
-
-//attacking
+//show_debug_message(sprite_index);
 
 #endregion

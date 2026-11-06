@@ -3,6 +3,9 @@ global.hitPause = false;
 global.hitPauseTimer = 0;
 global.hitPauseFrames = 6;
 
+global.player_sprite_height = 36;
+
+
 #macro CELL_SIZE 32
 
 global.coins = 1000;

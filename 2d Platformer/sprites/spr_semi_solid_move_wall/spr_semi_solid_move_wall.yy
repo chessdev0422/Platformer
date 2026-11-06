@@ -2,9 +2,9 @@
   "$GMSprite":"v2",
   "%Name":"spr_semi_solid_move_wall",
   "bboxMode":0,
-  "bbox_bottom":31,
+  "bbox_bottom":5,
   "bbox_left":0,
-  "bbox_right":31,
+  "bbox_right":15,
   "bbox_top":0,
   "collisionKind":1,
   "collisionTolerance":0,
@@ -16,7 +16,7 @@
   ],
   "gridX":0,
   "gridY":0,
-  "height":32,
+  "height":16,
   "HTile":false,
   "layers":[
     {"$GMImageLayer":"","%Name":"d3e179e5-b6c4-482e-b4d8-dff0b3b4843e","blendMode":0,"displayName":"default","isLocked":false,"name":"d3e179e5-b6c4-482e-b4d8-dff0b3b4843e","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
@@ -40,7 +40,7 @@
       0,
       1,
     ],
-    "top":2,
+    "top":0,
   },
   "origin":0,
   "parent":{
@@ -105,5 +105,5 @@
   },
   "type":0,
   "VTile":false,
-  "width":32,
+  "width":16,
 }

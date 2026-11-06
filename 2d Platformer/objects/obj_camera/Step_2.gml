@@ -25,7 +25,7 @@ x += (xTo - x) / 3;
 //Y------------/
 
 
-yTo = follow.y - _camHeight/2 - follow.sprite_height - 2;
+yTo = follow.y - _camHeight/2 - global.player_sprite_height - 2;
 
 
 
