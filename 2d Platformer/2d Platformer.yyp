@@ -64,6 +64,7 @@
     {"id":{"name":"obj_inventory_manager","path":"objects/obj_inventory_manager/obj_inventory_manager.yy",},},
     {"id":{"name":"obj_map","path":"objects/obj_map/obj_map.yy",},},
     {"id":{"name":"obj_moving_wall","path":"objects/obj_moving_wall/obj_moving_wall.yy",},},
+    {"id":{"name":"obj_player_trail","path":"objects/obj_player_trail/obj_player_trail.yy",},},
     {"id":{"name":"obj_player","path":"objects/obj_player/obj_player.yy",},},
     {"id":{"name":"obj_projectile","path":"objects/obj_projectile/obj_projectile.yy",},},
     {"id":{"name":"obj_room_transition","path":"objects/obj_room_transition/obj_room_transition.yy",},},

@@ -1,13 +1,12 @@
-scr_declare_damage_nonplayer(10);
+scr_declare_damage_nonplayer(10); //set the current hp and set up damage
 
-currentProjectile = obj_fireball;
-
-enum enemy_states {
+enum enemy_states
+{
 	idle, 
 	attacking,
 }
 
-state = enemy_states.idle;
 
-attackingTimerFrames = irandom_range(2 * 60, 4 * 60);
-attackingTimer = attackingTimerFrames;
+damageShader = false;//whether or not to draw the damage shader
+damageShaderTimer = 0; //timer to keep track of shader
+damageShaderFrames = 30; //the length of the damage shader to last

@@ -23,6 +23,7 @@ if instance_exists(obj_player)
 	var _max_hp = obj_player.maxHP;
 	var _total_hearts = _max_hp / 4;//the total amount of hearts
 	
+	var _max_health_x = 0;
 	//loop through the hearts
 	for (var i = 0; i < _total_hearts; i++)
 	{
@@ -35,10 +36,18 @@ if instance_exists(obj_player)
 		
 		//draw the heart
 		draw_sprite(_spr, _health_img, _xx, _yy);
+		
+		
+		var _next_x = _start_x + (i+1 mod _columns) * _sep_x;
+		if i == (_total_hearts - 1) || _xx > _next_x 
+		{
+			_max_health_x = _xx;
+		}
 	}
 
 	//draw the coin text
 	draw_text(32, 64, "Coins: " + string(global.coins));
+	
 	
 	if (_hp <= 2) {
    

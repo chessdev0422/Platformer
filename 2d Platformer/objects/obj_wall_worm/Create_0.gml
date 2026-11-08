@@ -1,3 +1,5 @@
+event_inherited(); // Inherit the parent event
+
 scr_declare_damage_nonplayer(10);
 
 currentProjectile = obj_fireball;

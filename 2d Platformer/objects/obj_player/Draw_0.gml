@@ -3,9 +3,14 @@ if damageShader
 	shader_set(dmgFlashShd);
 }
 
+if finalAttackRecoveryTimer > 0
+{
+	image_blend = c_ltgrey;
+}
 
 draw_sprite_ext(sprite_index, image_index, x, y, image_xscale * last_face, image_yscale, image_angle, image_blend, image_alpha);
 
+image_blend = c_white;
 
 shader_reset();
 draw_set_font(normal_font);

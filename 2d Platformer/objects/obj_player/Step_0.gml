@@ -1,6 +1,10 @@
+//show_debug_message(dashAttack);
+
 scr_get_controls(); //access the controls
 
 mask_index = maskSpr;
+
+var _damaged = iframeTimer > 0; //if we were just damaged, we are unable to jump, attack, dash, etc
 
 //reset the jump before and after running interact code
 if (instance_exists(obj_textbox) || obj_inventory_manager.invShowing || obj_map.mapShowing || obj_inventory_manager.otherShowing)
@@ -67,12 +71,15 @@ if global.paused exit;
 
 //attacking ------------------- /
 //reference anim end event
+var _can_create_attack_inst = false;
 #region attacking
-if (canAttack && !isAttacking && attackKeyBuffered)
+if (canAttack && !isAttacking && attackKeyBuffered && finalAttackRecoveryTimer <= 0 && dashTimer <= 0 && !_damaged) 
 {
     attackKeyBuffered = false;
     isAttacking = true;
     
+	_can_create_attack_inst = true;
+	
 	if (onGround)
     {
         if (upKey)
@@ -80,8 +87,9 @@ if (canAttack && !isAttacking && attackKeyBuffered)
             currentAttack = attacks.up_attack;
             image_index = 0;
         }
-        else if (moveType == 1 && abs(xspd) >= (moveSpd[1]))
+        else if (dashAttack)
         {
+			currentAttackDmg = 2;
             currentAttack = attacks.wide_attack;
             image_index = 0;
         }
@@ -89,40 +97,51 @@ if (canAttack && !isAttacking && attackKeyBuffered)
         {
             if (currentCombo == 0)
             {
+				currentAttackDmg = 1;
                 currentAttack = attacks.attack_1;
                 image_index = 0;
             }
             else if (currentCombo == 1)
             {
+				currentAttackDmg = 2;
                 currentAttack = attacks.attack_2;
                 image_index = 0;
             }
             else if (currentCombo >= 2)
             {
+				currentAttackDmg = 2;
                 currentAttack = attacks.wide_attack;
                 image_index = 0;
             }
         }
     }
-    else
+    else if currentCombo < maxAirAttack
     {
         if (downKey)
         {
+			currentAttackDmg = 2;
             currentAttack = attacks.down_attack;
+			currentCombo++;
             image_index = 0;
         }
         else if (upKey)
         {
+			currentAttackDmg = 1;
             currentAttack = attacks.jump_up_attack;
             image_index = 0;
+			currentCombo++;
         }
         else
         {
-            currentAttack = attacks.wide_attack;
+			currentAttackDmg = 1;
+            currentAttack = attacks.attack_1;
+			currentCombo++;
             image_index = 0;
         }
     }
 }
+
+dashAttack = false; //reset the possbility of a dash attack
 
 if (isAttacking)
 {
@@ -139,20 +158,9 @@ if (currentCombo > 0 && !isAttacking)
     }
 }
 
-if (afterAttackRecoveryTimer > 0)
-{
-    afterAttackRecoveryTimer--;
-    if (afterAttackRecoveryTimer <= 0) {
-        canAttack = true;
-    }
-}
-
 if (finalAttackRecoveryTimer > 0)
 {
     finalAttackRecoveryTimer--;
-    if (finalAttackRecoveryTimer <= 0) {
-        canAttack = true;
-    }
 }
 #endregion
 
@@ -181,8 +189,6 @@ if global.hitPauseTimer > 0
 
 if global.hitPause exit; //don't run any of the rest of the step event if hit "pausing"
 
-var _damaged = iframeTimer > 0; //if we were just damaged, we are unable to jump, pogo, etc
-
 
 #region moving and collisions
 //------------wall jump and slide checks-------/
@@ -193,16 +199,6 @@ var _wallCheckRight = place_meeting(x + 1, y, obj_wall);
 var _isSlidingLeft = _wallCheckLeft && leftKey && !onGround && yspd >= 0;
 var _isSlidingRight = _wallCheckRight && rightKey && !onGround && yspd >= 0;
 var _touchingWall = _isSlidingLeft || _isSlidingRight;
-
-//wall buffer timer (grace window for wall jumping)
-if (_wallCheckLeft || _wallCheckRight) && !onGround
-{
-    wallJumpBufferTimer = wallJumpBufferFrames;
-}
-else if wallJumpBufferTimer > 0
-{
-    wallJumpBufferTimer--;
-}
 
 
 //get "unstuck" from walls that have moved into the player in the begin step
@@ -352,45 +348,146 @@ if instance_exists(currentFloor) && currentFloor.xspd != 0 && !place_meeting(x, 
 		}
 	}
 
+//wall coyote time---------------/
+if (_isSlidingLeft) {
+    wallTouchTimerLeft = wallJumpBufferFrames;
+} else if (wallTouchTimerLeft > 0) {
+    wallTouchTimerLeft--;
+}
 
-//X movement
+if (_isSlidingRight) {
+    wallTouchTimerRight = wallJumpBufferFrames;
+} else if (wallTouchTimerRight > 0) {
+    wallTouchTimerRight--;
+}
+//----------/
+
+
+if !onGround && (wallTouchTimerLeft > 0 || wallTouchTimerRight > 0) && jumpKeyBuffered && !_damaged
+{
+    var _canWallJump = false;//whether or not we can wall jump
+    var _jumpDir = 0; //the direction of the force of the jump
+
+    if wallTouchTimerLeft > 0
+    {
+        _canWallJump = true;
+        _jumpDir = 1;
+    }
+    else if wallTouchTimerRight > 0
+    {
+        _canWallJump = true;
+        _jumpDir = -1;
+    }
+
+    if _canWallJump
+    {
+        face = _jumpDir;
+        last_face = _jumpDir;
+
+        xspd = face * wallJumpSpd[0];  
+        yspd = wallJumpSpd[1];
+
+        jumpKeyBuffered = false;
+        jumpKeyBufferTimer = 0;
+
+        coyoteHangTimer = 0;
+        coyoteJumpTimer = 0;
+		wallTouchTimerLeft = 0;
+        wallTouchTimerRight = 0;
+        currentFloor = noone;
+        
+        wallJumpTimer = wallJumpTimerMax;
+    }
+}
+
 if wallJumpTimer > 0
 {
-	wallJumpTimer--;
-} else if crouching {
-	xspd = 0;
-	if onGround
-	{
-		yspd = 0;
-	}
-} else {
-	if knockBackTimer <= 0 && !isAttacking //lock the face (not attacking or being knocked back)
-	{
-		//direction
-		face = rightKey - leftKey;
-	
-		///set the moveType
-		if onGround {
-			moveType = runKey;
-		}
-	
-		//set xspd
-		target_xspd = face * moveSpd[moveType];
-	
-		if face != 0 {last_face = face;};
-	}
+    wallJumpTimer--;
+    
+    var _target_wall_xspd = moveSpd[0] * (rightKey - leftKey);
+    if (rightKey - leftKey != 0) 
+    {
+        xspd = lerp(xspd, _target_wall_xspd, wallJumpPlayerStrength);
+    }
 }
-
-
-//Apply acceleration ---- / //IMPORTANT, Before collisions
-var _target_accel = 0;
-if face != 0
+else if crouching 
 {
-	_target_accel = accel; //acceleration
-} else {
-	_target_accel = ff; //friction
+    xspd = 0;
+    if onGround 
+    {
+        yspd = 0;
+    }
+} 
+else 
+{
+    if knockBackTimer <= 0 && !isAttacking 
+    {
+        face = rightKey - leftKey;
+    
+        if onGround 
+        {
+            moveType = runKey;
+        }
+    
+        target_xspd = face * moveSpd[moveType];
+    
+        if face != 0 { last_face = face; }
+    }
+
+	//Apply acceleration ---- / //IMPORTANT, Before collisions
+	var _target_accel = 0;
+	if face != 0
+	{
+		_target_accel = accel; //acceleration
+	} else {
+		_target_accel = ff; //friction
+	}
+	xspd = lerp(xspd, target_xspd, _target_accel); //lerp
 }
-xspd = lerp(xspd, target_xspd, _target_accel); //lerp
+
+if dashTimer > 0
+{
+	dashTimer--;
+	xspd = (dashSpd - (dashff * (dashFrames - dashTimer))) * last_face; //constantly set the dashSpd
+	if (dashTimer == 0)
+    {
+		dashRecoveryTimer = dashRecoveryFrames;
+		dashAttack = true;
+    }
+}
+
+if dashTimer mod 5 == 0 && dashTimer > 0
+{
+	var _vfx = instance_create_depth(x, y, depth + 1, obj_player_trail); //create the dash trail
+	with(_vfx)
+	{
+		sprite_index = other.sprite_index;
+		dir = other.last_face;
+	}
+}
+
+if dashRecoveryTimer > 0
+{
+	dashRecoveryTimer--;
+}
+
+if onGround 
+{
+	dashCount = 0;
+}
+
+//show_debug_message(dashKey);
+
+//dashes
+if dashKeyBuffered && dashCount < maxDash && dashTimer <= 0 && dashRecoveryTimer <= 0 && !isAttacking && finalAttackRecoveryTimer <= 0 && !_damaged
+{
+	xspd = dashSpd;
+	dashTimer = dashFrames;
+	if !onGround
+	{
+		dashCount++;
+	}
+}
 
 	//X collision ----- /
 	
@@ -407,7 +504,6 @@ xspd = lerp(xspd, target_xspd, _target_accel); //lerp
 		}
 		
 		xspd = 0; //set xspd to 0 to "collide"
-		wallJumpTimer = 0;//reset the wall jump timer so we stop ignoring the x movement
 	}
 	
 if (sprite_index == landSprDist) && image_index < image_number - 1 {xspd = 0;};
@@ -420,15 +516,18 @@ x += xspd;
 //show_debug_message(moveSpd[1]);
 
 //Y movement
-if coyoteHangTimer > 0
+if coyoteHangTimer > 0 //this will be true if we are not on the ground, or we have run out of coyote time
 {
 	//subtract from the coyote hang timer
 	coyoteHangTimer--;
 } else { 
+	if dashTimer <= 0
+	{
 		//gravity, only if coyote hang timer <= 0
 		yspd += grav;
 		onGround = false;
 		coyoteHangTimer = 0;
+	}
 }
 
 	//cap the yspd based on the terminal vel
@@ -459,54 +558,9 @@ if coyoteHangTimer > 0
 	
 	//jumping-------------/
 	
-		/*// wall jumps
-		if !onGround && wallJumpBufferTimer > 0 && wallJumpTimer <= 0 && jumpKeyBuffered
-		{
-		    var _canWallJump = false;
-		    var _jumpDir = 0;
-
-		    //wall jump is left
-		    if _wallCheckLeft
-		    {
-		        _canWallJump = true;
-		        _jumpDir = 1; //push right
-		    }
-    
-		    //the opposite
-		    else if _wallCheckRight
-		    {
-		        _canWallJump = true;
-		        _jumpDir = -1;
-		    }
-
-		    //execute wall jump
-		    if _canWallJump
-		    {
-		        face = _jumpDir;
-		        last_face = _jumpDir;
-
-		        
-		        xspd = face * 6.5; 
-		        yspd = -1;
-
-		        //reset
-		        jumpKeyBuffered = false;
-		        jumpKeyBufferTimer = 0;
-		        wallBufferTimer = 0;
-		        jumpHoldTimer = jumpHoldFrames[0];
-
-		        coyoteHangTimer = 0;
-		        coyoteJumpTimer = 0;
-		        currentFloor = noone;
-        
-		
-		        wallJumpTimer = wallJumpTimerFrames;
-		    }
-		}*/
-	
 		//on ground
 		if jumpKeyBuffered && jumpCount < maxJump && !_touchingWall /*touching wall being sliding*/ && !crouching && !_damaged
-		&& !((sprite_index == landSprDist) && image_index < image_number - 1)
+		&& !((sprite_index == landSprDist) && image_index < image_number - 1) && wallTouchTimerLeft <= 0 && wallTouchTimerRight <= 0
 		{
 			yspd = jumpSpd[0];//set the player jumping
 		
@@ -515,7 +569,8 @@ if coyoteHangTimer > 0
 		
 			if jumpCount > 0
 			{
-				instance_create_depth(x, y, 0, obj_double_jump_effect);	
+				instance_create_depth(x, y, 0, obj_double_jump_effect);
+				nextJumpTimer = nextJumpFrames;
 			}
 			
 			jumpCount++;//increase the number of jumps
@@ -559,8 +614,12 @@ if coyoteHangTimer > 0
 				yspd = jumpSpd[0];
 				//count down the timer
 				jumpHoldTimer--;
-			}  
-	
+			}
+			
+	if nextJumpTimer > 0
+	{
+		nextJumpTimer--;
+	}
 	
 	//Y collision-----------/
 	
@@ -708,7 +767,10 @@ if coyoteHangTimer > 0
 	
 	
 //move the player in the y
-y += yspd;
+if dashTimer <= 0
+{
+	y += yspd;
+}
 
 
 
@@ -877,7 +939,10 @@ if isAttacking == true
 		break;
 	}
 	show_debug_message(sprite_index);
-} 
+}
+else if dashTimer > 0 {
+	sprite_index = dashSpr;
+}
 else if (_justStartedLanding || _aboutToStartLanding) {
     if (yspd >= terminal_vel[0]) {
         sprite_index = landSprDist;
@@ -903,7 +968,12 @@ else if (sprite_index == landSpr || sprite_index == landSprDist) && image_index 
 else if !onGround {
     //in the air
     if yspd < 0 {
-        sprite_index = jumpSpr;
+			sprite_index = jumpSpr;
+			if nextJumpTimer > 0
+			{
+				image_index = image_number - 1;
+				sprite_index = landSpr;
+			}
     }
     else {
         if (sprite_index == jumpSpr) {
@@ -930,5 +1000,28 @@ else if abs(xspd) <= 0.1 {
 }
 
 //show_debug_message(sprite_index);
+
+//create the attacking damage object at the very end of the step event, IMPORTANT -- need to make sure sprite index is set properly
+//then set the damage object sprite index, mask index, and x/y
+
+var _dmg = currentAttackDmg;
+if _can_create_attack_inst
+{
+	var _attack_dmg_inst = instance_create_depth(x, y, depth - 1, obj_damage_non_player);
+	with (_attack_dmg_inst)
+	{
+		mask_index = other.sprite_index;
+		sprite_index = other.sprite_index;
+		image_xscale = other.image_xscale * other.last_face;
+		//show_debug_message(mask_index);
+		followPlayer = true;
+		image_index = other.image_index;
+		damage = _dmg;
+	}
+	if sprite_index == attackSprWide
+	{
+		alarm[0] = 20;
+	}
+}
 
 #endregion

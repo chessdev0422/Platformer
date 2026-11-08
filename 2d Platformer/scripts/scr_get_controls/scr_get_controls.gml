@@ -9,6 +9,9 @@ function scr_controls_setup()
 	
 	attackKeyBuffered = false;
 	attackKeyBufferTimer = 0;
+	
+	dashKeyBuffered = false;
+	dashKeyBufferTimer = 0;
 }
 
 
@@ -67,6 +70,8 @@ function scr_get_controls()
 	
 	runKey = keyboard_check(vk_shift)// || gamepad_button_check(0, gp_face3);
 	
+	dashKey = keyboard_check_pressed(vk_control) //|| game_pad_button_check(0, gp_face3);
+	
 	attackKey = keyboard_check_pressed(ord("X")) || mouse_check_button_pressed(mb_right); // || gamepad_button_check_pressed(0, gp_face0);
 	
 	attackKeyHeld = keyboard_check(ord("X")); // || gamepad_button_check(0, gp_face0);
@@ -82,7 +87,7 @@ function scr_get_controls()
 	lmButton = mouse_check_button_pressed(mb_left);
 	rmButton = mouse_check_button_pressed(mb_right);
 	
-	
+	//input buffering-------------/
 	if object_index == obj_player
 	{
 		//jump key buffering
@@ -106,9 +111,31 @@ function scr_get_controls()
 		if attackKeyBufferTimer > 0
 		{
 			attackKeyBuffered = true;
-			attackKeyBufferTimer--;
+			if dashTimer > 0
+			{
+				attackKeyBufferTimer -= 0.25;
+			} else {
+				attackKeyBufferTimer--;
+			}
 		} else {
 			attackKeyBuffered = false;
+		}
+		
+		//dash key buffering
+		if dashKey
+		{
+			dashKeyBufferTimer = bufferTime;
+		}
+		if dashKeyBufferTimer > 0
+		{
+			dashKeyBuffered = true;
+			if isAttacking {
+				dashKeyBufferTimer -= 0.25;
+			} else {
+				dashKeyBufferTimer--;
+			}
+		} else {
+			dashKeyBuffered = false;
 		}
 	}
 }

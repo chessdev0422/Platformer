@@ -62,6 +62,7 @@ jumpSpd[1] = -12//when bouncing
 
 #macro BOUNCING 1 //bouncing
 
+
 maxJump = 2;//the max amount of jumps the player has, defaulted to 1, 2 = double jump, 3 = triple jump, etc
 jumpCount = 0;//the current index of jump we are on, 1 = already used first jump
 jumpHoldTimer = 0;//a timer for how long jump button has been held
@@ -69,14 +70,40 @@ jumpHoldTimer = 0;//a timer for how long jump button has been held
 jumpHoldFrames[0] = 20;//the amount of frames the player can hold the jump input for variable jump height
 jumpHoldFrames[1] = 10;//an array for each jumpCount of course
 
-wallJumpBufferTimer = 0;//buffer frames when wall jumping
-wallJumpBufferFrames = 6;
+//next jump
+nextJumpTimer = 0;
+nextJumpFrames = 15;
+
 
 onGround = true;//whether or not the player has solid ground directly beneath them
 
-wallSliding = false;
+//wall jumps and sliding
+wallJumpSpd = [7.5, -8.5];//[X speed push off the wall, Y upward boost]
+wallJumpTimerMax = 45;//duration of the wall jump momentum window (frames)
 wallJumpTimer = 0;
-wallJumpTimerFrames = 20;//number of frames moving is locked out when wall jumping
+wallJumpPlayerStrength = 0.05;//the strength it will feel the player has to go "against" the wall jump
+wallTouchTimerLeft = 0;
+wallTouchTimerRight = 0;
+wallJumpBufferFrames = 5;
+
+wallSliding = false;
+
+//dashing--------------/
+
+dashTimer = 0;
+dashFrames = 14;//length of the dash (frames)
+dashSpd = 13.5;//the inital speed of the dash (ppf)
+dashff = 0.1;//the amount the dash slows down by (force of friction)
+
+//air
+maxDash = 1; //max amt of dashes
+dashCount = 0; //current count of dashes
+
+//recovery
+dashRecoveryTimer = 0;
+dashRecoveryFrames = 1 * 60; //1 seconds (60 frames) of recovery period after dash
+
+dashAttack = false;//whether or not there could potentially be a dash attack
 
 //coyote time --------/
 //hang frames
@@ -86,7 +113,6 @@ coyoteHangTimer = 0;
 //jump buffer frames
 coyoteJumpFrames = 5;
 coyoteJumpTimer = 0;
-
 
 //sprite control-----------/
 last_face = 1;
@@ -110,6 +136,7 @@ attackSprWide = spr_player_wide_attack;
 attackSprUp = spr_player_up_attack;
 attackSprDown = spr_player_down_attack;
 attackSprJump = spr_player_jump_up_attack;
+dashSpr = spr_player_running;
 
 //state variables
 crouching = false;
@@ -141,6 +168,7 @@ knockBackStrengthY = 5;//the strength the player will be knocked back with on th
 knockBackTimer = 0;
 knockBackFrames = 20;//length of the knockback
 
+currentAttackDmg = 1;
 
 //attacking - combos - running attacks - air attacks
 
@@ -157,23 +185,22 @@ enum attacks {
 	up_attack,
 	jump_up_attack,
 	down_attack,
+	dash_attack,
 	//charge_attack,
 }
 
 //combos
 currentAttack = attacks.attack_1; //store the current attack
 currentCombo = 0;
-comboQueued = false;
-maxCombo = 3;//the final attack in the sequence (third attack)
+numAirAttack = 0;
+maxAirAttack = 1;
 comboHitFrames = bufferTime;
 comboLostTimer = 0;
 comboLostFrames = 10;
 
 //recovery time
-afterAttackRecoveryTimer = 0;
-afterAttackRecoveryFrames = 15; //15 (1/4 second) frames of a recovery period after a normal attack (assuming missed combo)
 finalAttackRecoveryTimer = 0;
-finalAttackRecoveryFrames = 1*60; //1 seconds of a recovery period after a final wide attack in a sequence (or running attack)
+finalAttackRecoveryFrames = 1/2 * 60; //1/2 seconds of a recovery period after a final wide attack in a sequence (or running attack)
 
 
 //-----------------//

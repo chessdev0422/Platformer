@@ -1,20 +1,8 @@
-switch(state)
-{
-	case enemy_states.idle:
-	{
-		break;
-	} 
-	case enemy_states.attacking:
-	{
-		attackingTimer = attackingTimerFrames;
-		state = enemy_states.idle;
-		instance_create_depth(x, y - sprite_height/2, 0, currentProjectile);
-	}
-}
+scr_take_damage(obj_damage_non_player); //take damage from damaging objects
 
-if attackingTimer > 0
+if damageShaderTimer > 0
 {
-	attackingTimer--;
+	damageShaderTimer--;
 } else {
-	state = enemy_states.attacking;
+	damageShader = false;
 }

@@ -139,9 +139,12 @@ function scr_take_damage( _damageObj, iframes = false)
 					}
 					
 					//set up the knockback variables --- run the script in the step event
-					knockBackTimer = knockBackFrames;
-					knockBackX = _inst.x;
-					knockBackY = _inst.y;
+					if variable_instance_exists(id, "knockBackTimer")
+					{
+						knockBackTimer = knockBackFrames;
+						knockBackX = _inst.x;
+						knockBackY = _inst.y;
+					}
 				}
 			}
 			
@@ -157,7 +160,7 @@ function scr_take_damage( _damageObj, iframes = false)
 	}
 		
 		
-		if iframes == false
+		if iframes == false //enemies
 		{
 			//clear the damage list
 			var _damageListSize = ds_list_size(damageList);

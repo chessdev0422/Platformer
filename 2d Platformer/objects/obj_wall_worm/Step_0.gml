@@ -1,3 +1,5 @@
+event_inherited();
+
 switch(state)
 {
 	case enemy_states.idle:
@@ -8,7 +10,7 @@ switch(state)
 	{
 		attackingTimer = attackingTimerFrames;
 		state = enemy_states.idle;
-		instance_create_depth(x, y, 0, currentProjectile);
+		//instance_create_depth(x, y, 0, currentProjectile);
 	}
 }
 
