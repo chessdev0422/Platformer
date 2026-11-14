@@ -37,8 +37,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spr_wall_worm",
-    "path":"sprites/spr_wall_worm/spr_wall_worm.yy",
+    "name":"spr_wall_worm_idle",
+    "path":"sprites/spr_wall_worm_idle/spr_wall_worm_idle.yy",
   },
   "spriteMaskId":null,
   "tags":[

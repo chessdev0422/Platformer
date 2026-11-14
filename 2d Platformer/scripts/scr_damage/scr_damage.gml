@@ -34,6 +34,7 @@ function scr_knockback(_x, _y, _strength_x, _strength_y)
     yspd = -_strength_y;
 }
 
+
 function scr_take_damage( _damageObj, iframes = false)
 {
 	
@@ -144,6 +145,11 @@ function scr_take_damage( _damageObj, iframes = false)
 						knockBackTimer = knockBackFrames;
 						knockBackX = _inst.x;
 						knockBackY = _inst.y;
+					}
+					if variable_instance_exists(id, "knockBackDamagingInstX")
+					{
+						knockBackDamagingInstX = _inst.x;
+						knockBackDamagingInstY = _inst.y;
 					}
 				}
 			}

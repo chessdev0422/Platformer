@@ -78,7 +78,7 @@ nextJumpFrames = 15;
 onGround = true;//whether or not the player has solid ground directly beneath them
 
 //wall jumps and sliding
-wallJumpSpd = [7.5, -8.5];//[X speed push off the wall, Y upward boost]
+wallJumpSpd = [4.5, -5.5];//[X speed push off the wall, Y upward boost]
 wallJumpTimerMax = 45;//duration of the wall jump momentum window (frames)
 wallJumpTimer = 0;
 wallJumpPlayerStrength = 0.05;//the strength it will feel the player has to go "against" the wall jump
@@ -192,16 +192,16 @@ enum attacks {
 //combos
 currentAttack = attacks.attack_1; //store the current attack
 currentCombo = 0;
-numAirAttack = 0;
-maxAirAttack = 1;
 comboHitFrames = bufferTime;
 comboLostTimer = 0;
 comboLostFrames = 10;
 
+currentAirAttackCnt = 0;
+maxAirAttack = 1;
+
 //recovery time
 finalAttackRecoveryTimer = 0;
 finalAttackRecoveryFrames = 1/2 * 60; //1/2 seconds of a recovery period after a final wide attack in a sequence (or running attack)
-
 
 //-----------------//
 

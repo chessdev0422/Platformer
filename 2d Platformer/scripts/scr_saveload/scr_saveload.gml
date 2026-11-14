@@ -280,6 +280,7 @@ function save_game(_fileNum = 0)
 		show_debug_message("This is the inventory");
 		
 		global.statData.coins = global.coins;
+
 		
 		array_push(_saveArray, global.statData);
 	
@@ -297,6 +298,8 @@ function save_game(_fileNum = 0)
 
 function load_game(_fileNum = 0)
 {
+	global.current_save = _fileNum;
+	
 	var _filename = "savedata" + string(_fileNum) +".sav";
 	
 	if !file_exists(_filename) { exit;};
@@ -312,6 +315,7 @@ function load_game(_fileNum = 0)
 	global.statData = array_get(_loadArray, 0);
 	
 	global.levelData = array_get(_loadArray, 1);
+	
 	
 	global.inventory = global.statData.inv;
 	
@@ -346,4 +350,46 @@ function load_game(_fileNum = 0)
 	}
 	
 	load_room();
+}
+
+function save_controls()
+{
+    ini_open("controls.ini");
+    
+    ini_write_real("Controls", "key_right",           global.key_right);
+    ini_write_real("Controls", "key_left",            global.key_left);
+    ini_write_real("Controls", "key_down",            global.key_down);
+    ini_write_real("Controls", "key_up",              global.key_up);
+    ini_write_real("Controls", "key_jump",            global.key_jump);
+    ini_write_real("Controls", "key_run",             global.key_run);
+    ini_write_real("Controls", "key_dash",            global.key_dash);
+    ini_write_real("Controls", "key_attack",          global.key_attack);
+    ini_write_real("Controls", "key_accept_interact", global.key_accept_interact);
+    ini_write_real("Controls", "key_map",             global.key_map);
+    ini_write_real("Controls", "key_inv",             global.key_inv);
+    ini_write_real("Controls", "key_buy_multiple",    global.key_buy_multiple);
+    
+    ini_close();
+}
+
+function load_controls()
+{
+    if (!file_exists("controls.ini")) exit;
+    
+    ini_open("controls.ini");
+    
+    global.key_right           = ini_read_real("Controls", "key_right",           global.key_right);
+    global.key_left            = ini_read_real("Controls", "key_left",            global.key_left);
+    global.key_down            = ini_read_real("Controls", "key_down",            global.key_down);
+    global.key_up              = ini_read_real("Controls", "key_up",              global.key_up);
+    global.key_jump            = ini_read_real("Controls", "key_jump",            global.key_jump);
+    global.key_run             = ini_read_real("Controls", "key_run",             global.key_run);
+    global.key_dash            = ini_read_real("Controls", "key_dash",            global.key_dash);
+    global.key_attack          = ini_read_real("Controls", "key_attack",          global.key_attack);
+    global.key_accept_interact = ini_read_real("Controls", "key_accept_interact", global.key_accept_interact);
+    global.key_map             = ini_read_real("Controls", "key_map",             global.key_map);
+    global.key_inv             = ini_read_real("Controls", "key_inv",             global.key_inv);
+    global.key_buy_multiple    = ini_read_real("Controls", "key_buy_multiple",    global.key_buy_multiple);
+    
+    ini_close();
 }

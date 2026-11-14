@@ -15,22 +15,62 @@ function scr_controls_setup()
 }
 
 
+function check_input(_key) {
+    if (_key == mb_left || _key == mb_right || _key == mb_middle) {
+        return mouse_check_button(_key);
+    }
+    return keyboard_check(_key);
+}
+
+function check_input_pressed(_key) {
+    if (_key == mb_left || _key == mb_right || _key == mb_middle) {
+        return mouse_check_button_pressed(_key);
+    }
+    return keyboard_check_pressed(_key);
+}
+
+function check_input_released(_key) 
+{
+    if (_key == mb_left || _key == mb_right || _key == mb_middle) {
+        return mouse_check_button_released(_key);
+    }
+    return keyboard_check_released(_key);
+}
+
 function scr_get_controls()
 {	
+	if (!variable_global_exists("key_right"))
+    {
+        global.key_right  = ord("D");
+        global.key_left   = ord("A");
+        global.key_down   = ord("S");
+        global.key_up     = ord("W");
+        global.key_jump   = ord("W");
+        global.key_run    = vk_shift;
+        global.key_dash   = ord("Q");
+        global.key_attack = ord("X");
+		global.key_accept_interact = vk_space;
+		global.key_map = ord("M");
+		global.key_inv = ord("I");
+		global.key_buy_multiple = vk_shift;
+		
+		load_controls();
+    }
+	
 	//gamepad_set_axis_deadzone(0, 0.3);
 	
 	
 	//Directional Inputs
-	rightKey = keyboard_check(ord("D"))// + sign(gamepad_axis_value(0, gp_axisrh));
+	rightKey = check_input(global.key_right)// + sign(gamepad_axis_value(0, gp_axisrh));
 	rightKey = clamp(rightKey, 0, 1);
 
-	leftKey = keyboard_check(ord("A"))//  + sign(gamepad_axis_value(0, gp_axislh));
+	leftKey = check_input(global.key_left)//  + sign(gamepad_axis_value(0, gp_axislh));
 	leftKey = clamp(leftKey, 0, 1);
 	
-	downKey = keyboard_check(ord("S"))// + sign(gamepad_axis_value(0, gp_axisrv));
+	downKey = check_input(global.key_down)// + sign(gamepad_axis_value(0, gp_axisrv));
 	downKey = clamp(downKey, 0, 1);
 	
-	upKey = keyboard_check(ord("E"))// + sign(gamepad_axis_value(0, gp_axislv));
+	upKey = check_input(global.key_up)// + sign(gamepad_axis_value(0, gp_axislv));
 	upKey = clamp(upKey, 0, 1);
 	
 	
@@ -39,49 +79,49 @@ function scr_get_controls()
 		
 	//var _right_stick_pressed = global.axis_rh_curr > 0.5 && global.axis_rh_prev <= 0.5;
 		
-	rightKeyPressed = keyboard_check_pressed(ord("D"))// + sign(_right_stick_pressed);
+	rightKeyPressed = check_input_pressed(global.key_right)// + sign(_right_stick_pressed);
 	rightKeyPressed = clamp(rightKeyPressed, 0, 1);
 	
 	//var _left_stick_pressed = global.axis_lh_curr > 0.5 && global.axis_lh_prev <= 0.5;
 	
-	leftKeyPressed = keyboard_check_pressed(ord("A"))//  + sign(_left_stick_pressed);
+	leftKeyPressed = check_input_pressed(global.key_left)//  + sign(_left_stick_pressed);
 	leftKeyPressed = clamp(leftKeyPressed, 0, 1);
 	
 	//var _down_stick_pressed = global.axis_rv_curr > 0.5 && global.axis_rv_prev <= 0.5;
 	
-	downKeyPressed = keyboard_check_pressed(ord("S"))// + sign(_down_stick_pressed);
+	downKeyPressed = check_input_pressed(global.key_down)// + sign(_down_stick_pressed);
 	downKeyPressed = clamp(downKeyPressed, 0, 1);
 	
 	//var _up_stick_pressed = global.axis_lv_curr > 0.5 && global.axis_lv_prev <= 0.5;
 	
-	upKeyPressed = keyboard_check_pressed(ord("E"))// + sign(_up_stick_pressed);
+	upKeyPressed = check_input_pressed(global.key_up)// + sign(_up_stick_pressed);
 	upKeyPressed = clamp(upKeyPressed, 0, 1);
 	
 	
 	//UI request inputs
-	acceptKey = keyboard_check_pressed(vk_space)// || gamepad_button_check_pressed(0, gp_face2);
+	acceptKey = check_input_pressed(global.key_accept_interact)// || gamepad_button_check_pressed(0, gp_face2);
 	
-	interactKey = keyboard_check_pressed(vk_space)// || gamepad_button_check_pressed(0, gp_face2);
+	interactKey = check_input_pressed(global.key_accept_interact)// || gamepad_button_check_pressed(0, gp_face2);
 	
 	//Action inputs
-	jumpKeyPressed = keyboard_check_pressed(ord("W"))// || gamepad_button_check_pressed(0, gp_face2); 
+	jumpKeyPressed = check_input_pressed(global.key_jump)// || gamepad_button_check_pressed(0, gp_face2); 
 	
-	jumpKeyHeld = keyboard_check(ord("W"))// || gamepad_button_check(0, gp_face2); 
+	jumpKeyHeld = check_input(global.key_jump)// || gamepad_button_check(0, gp_face2); 
 	
-	runKey = keyboard_check(vk_shift)// || gamepad_button_check(0, gp_face3);
+	runKey = check_input(global.key_run)// || gamepad_button_check(0, gp_face3);
 	
-	dashKey = keyboard_check_pressed(vk_control) //|| game_pad_button_check(0, gp_face3);
+	dashKey = check_input_pressed(global.key_dash) //|| game_pad_button_check(0, gp_face3);
 	
-	attackKey = keyboard_check_pressed(ord("X")) || mouse_check_button_pressed(mb_right); // || gamepad_button_check_pressed(0, gp_face0);
+	attackKey = check_input_pressed(global.key_attack) // || gamepad_button_check_pressed(0, gp_face0);
 	
-	attackKeyHeld = keyboard_check(ord("X")); // || gamepad_button_check(0, gp_face0);
+	attackKeyHeld = check_input(global.key_attack); // || gamepad_button_check(0, gp_face0);
 	
 	//UI inputs
-	mapKey = keyboard_check_pressed(ord("M"))// || gamepad_button_check_pressed(0, gp_select);
+	mapKey = check_input_pressed(global.key_map)// || gamepad_button_check_pressed(0, gp_select);
 	
-	invKey = keyboard_check_pressed(ord("I"))// || gamepad_button_check_pressed(0, gp_face1);
+	invKey = check_input_pressed(global.key_inv)// || gamepad_button_check_pressed(0, gp_face1);
 	
-	buyMultipleKey = keyboard_check(vk_shift)// || gamepad_button_check_pressed(0, gp_face3);
+	buyMultipleKey = check_input(global.key_buy_multiple)// || gamepad_button_check_pressed(0, gp_face3);
 	
 	//mouse inputs
 	lmButton = mouse_check_button_pressed(mb_left);

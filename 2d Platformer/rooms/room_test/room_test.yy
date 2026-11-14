@@ -26,6 +26,9 @@
     {"name":"inst_7ADC9810","path":"rooms/room_test/room_test.yy",},
     {"name":"inst_44DC6CCB","path":"rooms/room_test/room_test.yy",},
     {"name":"inst_58D841F","path":"rooms/room_test/room_test.yy",},
+    {"name":"inst_580A5A6A","path":"rooms/room_test/room_test.yy",},
+    {"name":"inst_7242281F","path":"rooms/room_test/room_test.yy",},
+    {"name":"inst_67882C3E","path":"rooms/room_test/room_test.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -62,6 +65,9 @@
         {"$GMRInstance":"v4","%Name":"inst_58D841F","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_58D841F","objectId":{"name":"obj_wall_worm","path":"objects/obj_wall_worm/obj_wall_worm.yy",},"properties":[
             {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"obj_wall_worm","path":"objects/obj_wall_worm/obj_wall_worm.yy",},"propertyId":{"name":"wall_dir","path":"objects/obj_wall_worm/obj_wall_worm.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"1",},
           ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":591.5,"y":845.0,},
+        {"$GMRInstance":"v4","%Name":"inst_580A5A6A","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_580A5A6A","objectId":{"name":"obj_bat","path":"objects/obj_bat/obj_bat.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":1137.0,"y":951.0,},
+        {"$GMRInstance":"v4","%Name":"inst_7242281F","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_7242281F","objectId":{"name":"obj_bat","path":"objects/obj_bat/obj_bat.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":238.0,"y":531.0,},
+        {"$GMRInstance":"v4","%Name":"inst_67882C3E","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_67882C3E","objectId":{"name":"obj_bat","path":"objects/obj_bat/obj_bat.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":548.0,"y":943.0,},
       ],"layers":[],"name":"Instances","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRTileLayer":"","%Name":"Stones","depth":100,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"layers":[],"name":"Stones","properties":[],"resourceType":"GMRTileLayer","resourceVersion":"2.0","tiles":{"SerialiseHeight":85,"SerialiseWidth":113,"TileCompressedData":[
           -4156,0,2,1,3,-111,0,2,8,10,-31,0,1,1,-6,2,1,3,-72,0,2,8,10,-31,0,1,8,-6,9,1,10,-72,0,2,8,10,-31,0,1,

@@ -12,6 +12,8 @@ if (instance_exists(obj_textbox) || obj_inventory_manager.invShowing || obj_map.
     jumpKeyPressed = false;
     jumpKeyBuffered = false;
     jumpKeyBufferTimer = 0;
+	xspd = 0;
+	sprite_index = idleSpr;
 }
 
 //testing / debugging -----------//
@@ -58,6 +60,8 @@ if (instance_exists(obj_textbox) || obj_inventory_manager.invShowing || obj_map.
     jumpKeyPressed = false;
     jumpKeyBuffered = false;
     jumpKeyBufferTimer = 0;
+	xspd = 0;
+	sprite_index = idleSpr;
 }
 
 
@@ -73,8 +77,14 @@ if global.paused exit;
 //reference anim end event
 var _can_create_attack_inst = false;
 #region attacking
-if (canAttack && !isAttacking && attackKeyBuffered && finalAttackRecoveryTimer <= 0 && dashTimer <= 0 && !_damaged) 
+if onGround
 {
+	currentAirAttackCnt = 0;
+}
+
+if (canAttack && !isAttacking && attackKeyBuffered && finalAttackRecoveryTimer <= 0 && dashTimer <= 0 && !_damaged && currentAirAttackCnt < maxAirAttack)
+{
+	
     attackKeyBuffered = false;
     isAttacking = true;
     
@@ -115,8 +125,9 @@ if (canAttack && !isAttacking && attackKeyBuffered && finalAttackRecoveryTimer <
             }
         }
     }
-    else if currentCombo < maxAirAttack
+    else
     {
+		currentAirAttackCnt++;
         if (downKey)
         {
 			currentAttackDmg = 2;
@@ -362,7 +373,6 @@ if (_isSlidingRight) {
 }
 //----------/
 
-
 if !onGround && (wallTouchTimerLeft > 0 || wallTouchTimerRight > 0) && jumpKeyBuffered && !_damaged
 {
     var _canWallJump = false;//whether or not we can wall jump
@@ -400,7 +410,7 @@ if !onGround && (wallTouchTimerLeft > 0 || wallTouchTimerRight > 0) && jumpKeyBu
     }
 }
 
-if wallJumpTimer > 0
+if wallJumpTimer > 0 && !onGround
 {
     wallJumpTimer--;
     
@@ -507,8 +517,8 @@ if dashKeyBuffered && dashCount < maxDash && dashTimer <= 0 && dashRecoveryTimer
 	}
 	
 if (sprite_index == landSprDist) && image_index < image_number - 1 {xspd = 0;};
-if instance_exists(obj_textbox) {xspd = 0;};
 if crouching {xspd = 0;};
+if isAttacking {xspd = 0;}
 
 //move the player in the x
 x += xspd;
@@ -521,7 +531,7 @@ if coyoteHangTimer > 0 //this will be true if we are not on the ground, or we ha
 	//subtract from the coyote hang timer
 	coyoteHangTimer--;
 } else { 
-	if dashTimer <= 0
+	if dashTimer <= 0 && !isAttacking
 	{
 		//gravity, only if coyote hang timer <= 0
 		yspd += grav;
@@ -765,6 +775,12 @@ if coyoteHangTimer > 0 //this will be true if we are not on the ground, or we ha
 			}
 		}
 	
+	
+//lerp the players yspd towards 0 when attacking
+if isAttacking
+{
+	yspd = lerp(yspd, 0, 0.15);
+}
 	
 //move the player in the y
 if dashTimer <= 0

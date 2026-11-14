@@ -13,4 +13,6 @@ global.coins = 1000;
 obj_player.x = 608;
 obj_player.y = 1152;
 
+global.current_save = 0;
+
 room_goto_next();
