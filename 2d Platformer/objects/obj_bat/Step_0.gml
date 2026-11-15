@@ -17,36 +17,66 @@ yspd = 0;//the yspd for the path here
 //set the enemy face
 face = obj_player.x > x ? -1 : 1;
 
-//create a path if it doesn't exist
-if (!path_exists(path))
-{
-    path = path_add();
-}
-            
+//prevent jitter (IMPORTANT)
+var _dist_to_player = point_distance(x, y, obj_player.x, obj_player.y - obj_player.sprite_height/2);
 
-if (mp_grid_path(global.mp_grid, path, x, y, obj_player.x, obj_player.y - obj_player.sprite_height/2, true))
+
+var _stop_distance = CELL_SIZE - 12;  //inner dist
+var _resume_distance = CELL_SIZE + 4; //outer dist
+
+if (is_pathing)
 {
-	//get the points directly from the path
-    if (path_get_number(path) > 1)
+	//keep pathing until close enough
+    if (_dist_to_player <= _stop_distance)
     {
-        var _nx = path_get_point_x(path, 1);
-        var _ny = path_get_point_y(path, 1);
-                    
-        var _dir = point_direction(x, y, _nx, _ny);
-        xspd = lengthdir_x(moveSpd, _dir);
-        yspd = lengthdir_y(moveSpd, _dir);
-		
-		var _target_dist = point_distance(x, y, _nx, _ny);
-		
-		//we've arrived
-		if (_target_dist <= moveSpd)
-		{
-		    x = _nx;
-		    y = _ny;
-		    xspd = 0;
-		    yspd = 0;
-		}
+        is_pathing = false;
     }
+}
+else
+{	
+    //if stopped pathing, stay stopped until out of outer dist
+    if (_dist_to_player >= _resume_distance)
+    {
+        is_pathing = true;
+    }
+}
+
+
+if (is_pathing)
+{
+	//create a path if it doesn't exist
+	if (!path_exists(path))
+	{
+	    path = path_add();
+	}
+         
+	if (mp_grid_path(global.mp_grid, path, x, y, obj_player.x, obj_player.y - obj_player.sprite_height/2, true))
+	{
+		//get the points directly from the path
+	    if (path_get_number(path) > 1)
+	    {
+	        var _nx = path_get_point_x(path, 1);
+	        var _ny = path_get_point_y(path, 1);
+                    
+	        var _dir = point_direction(x, y, _nx, _ny);
+	        xspd = lengthdir_x(moveSpd, _dir);
+	        yspd = lengthdir_y(moveSpd, _dir);
+		
+			var _target_dist = point_distance(x, y, _nx, _ny);
+		
+			//we've arrived
+			if (_target_dist <= moveSpd)
+			{
+			    var _speed_scale = _target_dist / moveSpd;
+    
+			    xspd = lengthdir_x(moveSpd * _speed_scale, _dir);
+			    yspd = lengthdir_y(moveSpd * _speed_scale, _dir);
+				
+				if (abs(xspd) < 0.25) xspd = 0;
+				if (abs(yspd) < 0.25) yspd = 0;
+		    }
+		}
+	}
 }
 
 if knockBackTimer > 0 {
@@ -55,13 +85,18 @@ if knockBackTimer > 0 {
 	yspd = knockBackStrengthY * sign(y + sprite_height/2 - knockBackDamagingInstY);
 }
 
-//movement in the x
+//inherit the players yspd if they are on a platform
+if !is_pathing && obj_player.currentFloor != noone && (obj_player.currentFloor.object_index == obj_moving_wall || obj_player.currentFloor.object_index == obj_semi_solid_moving_wall)
+{
+	yspd = obj_player.currentFloor.yspd;
+}
 
+//movement in the x
 
 //enemy separation (avoiding other enemies)
 var _sepX = 0;
 var _sepDist = 32; 
-var _sepStrength = 1.5; 
+var _sepStrength = 2; 
 
 with (obj_bat) 
 {
@@ -69,7 +104,7 @@ with (obj_bat)
     {
         var _dist = point_distance(other.x, other.y, x, y);
         
-        if (_dist < _sepDist && _dist > 0)
+        if (_dist < _sepDist)
         {
             var _dir = point_direction(x, y, other.x, other.y);
             var _weight = (1 - (_dist / _sepDist));
@@ -81,7 +116,6 @@ with (obj_bat)
     }
 }
 xspd += _sepX;
-
 
 	//collisions
 	//scoot right up to the wall
@@ -104,19 +138,19 @@ xspd += _sepX;
 x += xspd;	
 	
 //y
-	
+
 //separation
 var _sepY = 0;
 var _sepDist = 32; 
-var _sepStrength = 1.5; 
+var _sepStrength = 2; 
 
 with (obj_bat) 
 {
-	if (id != other.id && id > other.id)
+	if (id != other.id)
 	{
 	    var _dist = point_distance(other.x, other.y, x, y);
         
-	    if (_dist < _sepDist && _dist > 0)
+	    if (_dist < _sepDist)
 	    {
 	        var _dir = point_direction(x, y, other.x, other.y);
 	        var _weight = (1 - (_dist / _sepDist));
@@ -127,9 +161,8 @@ with (obj_bat)
 	    }
 	}
 }
-yspd += _sepY;
+yspd += _sepY;	
 
-	
 	//collisions
 	//scoot right up to the wall
 	var _subPixel = 0.5;
@@ -148,3 +181,8 @@ yspd += _sepY;
 	
 //move the enemy in the y
 y += yspd;
+
+/*if place_meeting(x, y, obj_wall)
+{
+	show_debug_message("Enemy id_num: " + string(id) + " is stuck in wall!)
+}*/

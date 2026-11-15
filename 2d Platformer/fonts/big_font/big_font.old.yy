@@ -1,6 +1,6 @@
 {
   "$GMFont":"",
-  "%Name":"description_font",
+  "%Name":"big_font",
   "AntiAlias":0,
   "applyKerning":0,
   "ascender":13,
@@ -117,7 +117,7 @@
   "last":0,
   "lineHeight":17,
   "maintainGms1Font":false,
-  "name":"description_font",
+  "name":"big_font",
   "parent":{
     "name":"Fonts",
     "path":"folders/Fonts.yy",

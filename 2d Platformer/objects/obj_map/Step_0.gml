@@ -25,10 +25,10 @@ if mapKey && !instance_exists(obj_textbox) && !obj_inventory_manager.invShowing
 if mapShowing {	
 	
 	//panning
-	if (leftKey)  map_pan_x += 5;
-	if (rightKey) map_pan_x -= 5;
-	if (upKey)    map_pan_y -= 5;
-	if (downKey)  map_pan_y += 5;
+	if (menuLeftKey)  map_pan_x += 5;
+	if (menuRightKey) map_pan_x -= 5;
+	if (menuUpKey)    map_pan_y -= 5;
+	if (menuDownKey)  map_pan_y += 5;
 
 	var _mouse_x = device_mouse_x_to_gui(0);
 	var _mouse_y = device_mouse_y_to_gui(0);

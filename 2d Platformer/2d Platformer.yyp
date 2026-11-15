@@ -19,8 +19,8 @@
     {"$GMFolder":"","%Name":"Sprites","folderPath":"folders/Enemies/Sprites.yy","name":"Sprites","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Bat","folderPath":"folders/Enemies/Sprites/Bat.yy","name":"Bat","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Shifter","folderPath":"folders/Enemies/Sprites/Shifter.yy","name":"Shifter","resourceType":"GMFolder","resourceVersion":"2.0",},
-    {"$GMFolder":"","%Name":"Fonts","folderPath":"folders/Fonts.yy","name":"Fonts","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Worm","folderPath":"folders/Enemies/Sprites/Worm.yy","name":"Worm","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"Fonts","folderPath":"folders/Fonts.yy","name":"Fonts","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Input","folderPath":"folders/Input.yy","name":"Input","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Interacting","folderPath":"folders/Interacting.yy","name":"Interacting","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Player","folderPath":"folders/Player.yy","name":"Player","resourceType":"GMFolder","resourceVersion":"2.0",},
@@ -52,7 +52,7 @@
   },
   "name":"2d Platformer",
   "resources":[
-    {"id":{"name":"normal_font","path":"fonts/normal_font/normal_font.yy",},},
+    {"id":{"name":"big_font","path":"fonts/big_font/big_font.yy",},},
     {"id":{"name":"obj_bat","path":"objects/obj_bat/obj_bat.yy",},},
     {"id":{"name":"obj_camera_bound_inst","path":"objects/obj_camera_bound_inst/obj_camera_bound_inst.yy",},},
     {"id":{"name":"obj_camera","path":"objects/obj_camera/obj_camera.yy",},},

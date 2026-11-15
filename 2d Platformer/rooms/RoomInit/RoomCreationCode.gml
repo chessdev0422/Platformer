@@ -15,4 +15,5 @@ obj_player.y = 1152;
 
 global.current_save = 0;
 
+randomise();
 room_goto_next();

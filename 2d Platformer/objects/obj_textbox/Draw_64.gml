@@ -1,14 +1,13 @@
 scr_get_controls();
 
-
-draw_set_font(normal_font);
+draw_set_font(big_font);
 
 var _mouse_x = device_mouse_x_to_gui(0);
 var _mouse_y = device_mouse_y_to_gui(0);
 
 var _total_pages_check = page_number-1;
 textbox_x = 0;
-textbox_y = gui_h - height - 32;
+textbox_y = gui_h - height - (32 * text_scale);
 
 if !setup //run the setup on creation
 {
@@ -31,8 +30,6 @@ if !setup //run the setup on creation
 				var _char_pos = j+1;
 				
 				char[j, i] = string_char_at(text[i], _char_pos);
-				
-				
 				
 				//get the current width of the line
 				var _text_up_to_char = string_copy(text[i], 1, _char_pos); //gets all of the text up until the current
@@ -90,7 +87,6 @@ if !setup //run the setup on creation
 				char_y[j, i] = _text_y + _text_line*(line_sep);
 			
 			}
-			
 			
 	}
 }
@@ -174,13 +170,13 @@ if draw_char == text_length[page] && page = _total_pages_check
 	var _total_options_check = option_number-1;
 	if !option_hover
 	{
-		option_pos += downKeyPressed - upKeyPressed;
+		option_pos += menuDownKeyPressed - menuUpKeyPressed;
 	}
 	option_pos = clamp(option_pos, 0, _total_options_check);
 	
-	var op_space = 16;
-	var op_border = 8;
-	var push_over_amt = 25;
+	var op_space = 16 * text_scale;
+	var op_border = 8 * text_scale;
+	var push_over_amt = 25 * text_scale;
 	
 	//draw the options
 	for(var i = 0; i < option_number; i++)
@@ -194,8 +190,8 @@ if draw_char == text_length[page] && page = _total_pages_check
 		if (option_pos == i)
 		{
 			_ox += push_over_amt; 
-			var a_w = sprite_get_width(spr_textbox_arrow);
-			draw_sprite(spr_textbox_arrow, 0, _ox - a_w - 4, _oy + _oh/2);
+			var a_w = sprite_get_width(spr_textbox_arrow) * text_scale;
+			draw_sprite_ext(spr_textbox_arrow, 0, _ox - a_w - (4 * text_scale), _oy + _oh/2, text_scale, text_scale, 0, c_white, 1);
 		}
 		
 		if point_in_rectangle(_mouse_x, _mouse_y, _ox, _oy, _ox + _ow, _oy + _oh)
@@ -217,8 +213,9 @@ if draw_char == text_length[page] && page = _total_pages_check
 //draw the speaker
 if speaker[page] != -1
 	{
-		draw_sprite(speaker_spr, textbox_img, _tx + width + border*2, _ty);
-		scr_speakers(speaker[page], _tx + width + border*2, _ty);
+		var _speaker_scale = text_scale;
+		draw_sprite_ext(speaker_spr, textbox_img, _tx + width + (border*2), _ty, _speaker_scale, _speaker_scale, 0, c_white, 1);
+		scr_speakers(speaker[page], _tx + width + (border*2), _ty);
 	}
 
 //draw the text

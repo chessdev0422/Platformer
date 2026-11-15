@@ -13,5 +13,5 @@ draw_sprite_ext(sprite_index, image_index, x, y, image_xscale * last_face, image
 image_blend = c_white;
 
 shader_reset();
-draw_set_font(normal_font);
+draw_set_font(big_font);
 draw_text(x, y + 20, hp);

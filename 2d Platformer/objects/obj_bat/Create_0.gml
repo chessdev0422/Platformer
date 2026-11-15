@@ -25,7 +25,7 @@ face = 0;
 
 xspd = 0;
 yspd = 0;
-moveSpd = 3;
+moveSpd = 3.5;
 
 isAttacking = false;
 
@@ -39,3 +39,4 @@ attackRange = 40;//distance to trigger attack
 
 //path setup
 path = path_add();
+is_pathing = false;

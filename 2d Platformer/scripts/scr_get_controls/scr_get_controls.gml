@@ -74,7 +74,6 @@ function scr_get_controls()
 	upKey = clamp(upKey, 0, 1);
 	
 	
-	
 	//Directional Inputs Pressed
 		
 	//var _right_stick_pressed = global.axis_rh_curr > 0.5 && global.axis_rh_prev <= 0.5;
@@ -126,6 +125,21 @@ function scr_get_controls()
 	//mouse inputs
 	lmButton = mouse_check_button_pressed(mb_left);
 	rmButton = mouse_check_button_pressed(mb_right);
+	
+	
+	//menu directional inputs
+	
+	//check
+	menuRightKey = keyboard_check(vk_right) || keyboard_check(ord("D"));
+	menuUpKey = keyboard_check(vk_up) || keyboard_check(ord("W"));
+	menuLeftKey = keyboard_check(vk_left) || keyboard_check(ord("A"));
+	menuDownKey = keyboard_check(vk_down) || keyboard_check(ord("S"));
+	
+	//pressed
+	menuRightKeyPressed = keyboard_check_pressed(vk_right) || keyboard_check_pressed(ord("D"));
+	menuUpKeyPressed = keyboard_check_pressed(vk_up) || keyboard_check_pressed(ord("W"));
+	menuLeftKeyPressed = keyboard_check_pressed(vk_left) || keyboard_check_pressed(ord("A"));
+	menuDownKeyPressed = keyboard_check_pressed(vk_down) || keyboard_check_pressed(ord("S"));
 	
 	//input buffering-------------/
 	if object_index == obj_player

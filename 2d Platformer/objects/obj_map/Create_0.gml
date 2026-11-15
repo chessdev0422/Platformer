@@ -1,12 +1,16 @@
 scr_controls_setup();
 
+
 mapShowing = false;//whether or not the map is pulled up
+
+//note: everything is designed for 360p, hence the map scale to halve it to 180p and fit the gui resolution
+map_scale = 0.5; // Scale factor to make the map draw at 1/2 size (180p scale relative to 360p)
 
 map_x = 128; //the top left x position of the map corner
 map_y = 96; //the top left y position of the map corner
 
-map_width = 384; //the width of the map
-map_height = 224; //the height of the map
+map_width = 384 * map_scale; //the width of the map
+map_height = 224 * map_scale; //the height of the map
 
 //the scale to draw the map at (not the same as the actual coverage, this is the x and y scale----
 //multiplied by the width and height to get the final scaled w and h)
@@ -30,6 +34,6 @@ minimap_pan_x = 0;
 minimap_pan_y = 0;
 
 closeSpr = spr_close_ui;
-closeStartX = map_x + map_width + 32;
+closeStartX = map_x + map_width + (32 * map_scale);
 closeStartY = map_y;
 closeAnim = 1;

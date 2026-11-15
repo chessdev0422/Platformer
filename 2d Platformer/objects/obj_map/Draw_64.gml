@@ -119,7 +119,10 @@ if mapShowing {
 if !mapShowing && !obj_inventory_manager.invShowing && !obj_inventory_manager.otherShowing //questsShowing etc
 {
 	if instance_exists(obj_warp) {exit;}
-	if global.paused { draw_set_alpha(0.5);}
+	
+	var _map_alpha = 0.5;
+	
+	draw_set_alpha(_map_alpha);
 	
 	
 	//get the scissor
@@ -129,7 +132,7 @@ if !mapShowing && !obj_inventory_manager.invShowing && !obj_inventory_manager.ot
 
 	var spr_w = sprite_get_width(spr_map_background);
 	var spr_h = sprite_get_height(spr_map_background);
-	draw_sprite_ext(spr_map_background, 0, minimap_x, minimap_y, minimap_w / spr_w, minimap_h / spr_h, 0, c_white, 1);
+	draw_sprite_ext(spr_map_background, 0, minimap_x, minimap_y, minimap_w / spr_w, minimap_h / spr_h, 0, c_white, _map_alpha);
 
 	if surface_exists(map_surface_bg)
 	{

@@ -4,8 +4,8 @@ depth = -1000;
 
 base_width = 320;
 base_height = 180;
-gui_width = 640;
-gui_height = 360;
+gui_width = 320;
+gui_height = 180;
 
 var _max_x_scale = display_get_width() / gui_width;
 var _max_y_scale = display_get_height() / gui_height;
@@ -18,6 +18,7 @@ if frac(_max_y_scale) == 0
 window_scale = floor(min(_max_y_scale, _max_x_scale));
 if (window_scale < 1) window_scale = 1;
 
+//NOTE -- window set size is separate from the gui lol but has to use at most gui w and h
 window_set_size(gui_width * window_scale, gui_height * window_scale);
 window_center();
 

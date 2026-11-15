@@ -1,13 +1,17 @@
+scr_controls_setup();
+
+text_scale = 0.35;
+
 gui_w = display_get_gui_width();
 gui_h = display_get_gui_height();
 
 //textbox parameters
-width = 275;
-height = 84;
+width = 275 * text_scale;
+height = 84 * text_scale;
 
-border = 8; //distance from the sides of the textbox to the actual text
+border = 8 * text_scale; //distance from the sides of the textbox to the actual text
 
-line_sep = 20; //separation of the line breaks
+line_sep = 20 * text_scale; //separation of the line breaks
 line_width = width - border*2;//width of the lines of text
 
 page = 0;
@@ -20,7 +24,6 @@ draw_char = 0;//dictates how many chars are being drawn currently of text array
 text_spd = 1; //the speed the text advances at
 
 setup = false;
-
 
 textbox_spr = spr_textbox; //the sprite of the textbox
 speaker_spr = spr_speaker_box;//sprite of the speaker box
