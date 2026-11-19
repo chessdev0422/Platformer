@@ -1,9 +1,8 @@
+depth = -100;
+
 scr_controls_setup();
 
-text_scale = 0.35;
-
-gui_w = display_get_gui_width();
-gui_h = display_get_gui_height();
+text_scale = 1;
 
 //textbox parameters
 width = 275 * text_scale;
@@ -27,6 +26,7 @@ setup = false;
 
 textbox_spr = spr_textbox; //the sprite of the textbox
 speaker_spr = spr_speaker_box;//sprite of the speaker box
+textbox_option_spr = spr_option_box; //of the option box
 textbox_img = 0; // the frame
 textbox_img_spd = 0/60; // the image_speed
 

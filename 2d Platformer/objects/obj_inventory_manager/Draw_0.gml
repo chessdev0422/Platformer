@@ -1,11 +1,15 @@
+var _cam = view_camera[0];
+var _cam_x = camera_get_view_x(_cam);
+var _cam_y = camera_get_view_y(_cam);
+
 if invShowing
 {
 	scr_get_controls();
 	
 	var _inv = global.inventory; //the inventory
 	
-	var _mouse_x = device_mouse_x_to_gui(0); //get the mouse x pos
-	var _mouse_y = device_mouse_y_to_gui(0); //the y pos
+	var _mouse_x = mouse_x; //get the mouse x pos
+	var _mouse_y = mouse_y; //the y pos
 	
 	var _sw = sprite_get_width(spr_inv_background);
 	var _sh = sprite_get_height(spr_inv_background);
@@ -13,7 +17,7 @@ if invShowing
 	var _xs = innerWidth/_sw;
 	var _ys = innerHeight/_sh;
 	
-	draw_sprite_ext(spr_inv_background, 0, innerStartX, innerStartY, _xs, _ys, 0, c_white, 1);
+	draw_sprite_ext(spr_inv_background, 0, ((innerStartX) + _cam_x), ((innerStartY) + _cam_y), _xs, _ys, 0, c_white, 1);
 	
 	var _inv_length = array_length(global.inventory);
 	
@@ -44,7 +48,7 @@ if invShowing
 			var _isHover = false; //whether or not we are hovering a slot
 			var _iA = invAnims[i];
 			
-			if point_in_rectangle(_mouse_x, _mouse_y, _xx, _yy, _xx + _sw, _yy + _sh)
+			if point_in_rectangle(_mouse_x, _mouse_y, ((_xx) + _cam_x), ((_yy) + _cam_y), ((_xx + _sw) + _cam_x), ((_yy + _sh) + _cam_y))
 			{
 				_isHover = true;//we are hovering
 			}
@@ -57,11 +61,11 @@ if invShowing
 				itemNameDraw = _inv[i].name;
 				descBufferTimer = descBufferFrames; //set the timer
 				
-				_iA = lerp(_iA, 1.1, 0.3);//lerp towards a bigger size
+				_iA = lerp(_iA, 1.02, 0.3);//lerp towards a bigger size
 				
 				if lmButton || rmButton
 				{
-					_iA = 0.9;
+					_iA = 0.98;
 				}
 				
 			} else {
@@ -71,7 +75,7 @@ if invShowing
 			var _sizeMod = _iA;//modify the slot size based on the lerped position
 			invAnims[i] = _iA;
 			
-			draw_sprite_ext(slot, 0, _xx + _sw/2, _yy + _sh/2, inv_scale * _sizeMod, inv_scale * _sizeMod, 0, c_white, 1);
+			draw_sprite_ext(slot, 0, ((_xx + _sw/2) + _cam_x), ((_yy + _sh/2) + _cam_y), inv_scale * _sizeMod, inv_scale * _sizeMod, 0, c_white, 1);
 			
 			var _item_spr = _inv[i].icon;
 			
@@ -81,7 +85,7 @@ if invShowing
 			var _ixx = _xx + _sw/2;
 			var _iyy = _yy + _sh/2;
 			
-			draw_sprite_ext(_item_spr, 0, _ixx, _iyy, inv_scale, inv_scale, 0, c_white, 1);
+			draw_sprite_ext(_item_spr, 0, ((_ixx) + _cam_x), ((_iyy) + _cam_y), inv_scale, inv_scale, 0, c_white, 1);
 
 			var _quantity = _inv[i].amount;	
 			
@@ -91,11 +95,11 @@ if invShowing
 			
 			if _quantity > 1//only if more than 1
 			{
-				draw_set_font(big_font);
-				draw_set_colour(c_red);
+				draw_set_font(small_font);
+				draw_set_colour(c_white);
 				draw_set_halign(fa_center);//set alignment
 				draw_set_valign(fa_middle);
-				draw_text(_qxx, _qyy, "x" + string(_quantity));//draw q-text
+				draw_text(((_qxx) + _cam_x), ((_qyy) + _cam_y), "x" + string(_quantity));//draw q-text
 				draw_set_halign(fa_left);
 				draw_set_valign(fa_top);//reset
 				draw_set_colour(c_white);
@@ -116,85 +120,78 @@ if invShowing
 		if (abs(closePercent - closeTarget) < 0.01) {
 		    closePercent = closeTarget;
 		}
+	
+	if (closePercent > 0) {
 		
-		if (closePercent > 0) && hoveredItem != -1 {
-			
-			var _gui_w = display_get_gui_width(); ///get gui to window resolutions
-			var _gui_h = display_get_gui_height();
-			var _win_w = window_get_width();
-			var _win_h = window_get_height();
+	var view_w = camera_get_view_width(view_camera[0]);
+	var view_h = camera_get_view_height(view_camera[0]);
+	var gui_scale_x = window_get_width() / view_w;
+	var gui_scale_y = window_get_height() / view_h; //IMPORTANT --- we need to get the scale factor between window res and gui res
+		
+		var _current_height = descBoxHeight * 1.5 * closePercent; //get the current height based on the percentage drawn
 
-			var _scale_x = _win_w / _gui_w;
-			var _scale_y = _win_h / _gui_h;
+		var _current_y = descBoxStartY + (descBoxHeight / 2) - (_current_height / 2); //find the current y
+		
+		var _scissor = gpu_get_scissor();
+		
+		gpu_set_scissor(
+		(descBoxStartX) * gui_scale_x, 
+		(_current_y) * gui_scale_y,
+		descBoxWidth * gui_scale_x, 
+		_current_height * gui_scale_y); //clip the view
+		
+			var _dsw = sprite_get_width(descBackground);
+			var _dsh = sprite_get_height(descBackground);
+			var _wd = descBoxWidth / _dsw;
+			var _hd = descBoxHeight / _dsh;
+			var _y_scale = _hd * closePercent;
+			draw_sprite_ext(descBackground, 0, ((descBoxStartX) + _cam_x), ((descBoxStartY + (descBoxHeight / 2)) + _cam_y), _wd, _y_scale, 0, c_white, 1);
 			
-			var _current_height = descBoxHeight * closePercent; //get the current height based on the percentage drawn
+			if array_length(_inv) > 0 && hoveredItem >= 0 && hoveredItem < array_length(_inv) && _inv[hoveredItem] != -1
+			{
+				var _sep_text = 6 * inv_scale;//offset from the starting x and y
+				var _desc = _inv[hoveredItem].description;//description text to draw
+			
+				var _t_height = string_height("T") * 1.35 //height of the font
+			
+				draw_set_font(small_font);
+				draw_text_ext(((descBoxStartX + _sep_text) + _cam_x), ((descBoxStartY + _sep_text) + _cam_y), _desc, _t_height, descBoxWidth - _sep_text * 2);
+			}
+			
+			gpu_set_scissor(_scissor);
+			
+			var _current_name_height = nameBoxHeight * 1.5 * closePercent; //1.5 to account for the extra half on the bottom 
+			var _current_name_y = nameBoxStartY + (nameBoxHeight / 2) - (_current_name_height / 2); 
+		
+			gpu_set_scissor(
+			(nameBoxStartX) * gui_scale_x, 
+			(_current_name_y) * gui_scale_y, 
+			nameBoxWidth * gui_scale_x, 
+			_current_name_height * gui_scale_y); 
+		
+			var _wn = nameBoxWidth / _dsw;
+			var _hn = nameBoxHeight / _dsh;
+			var _name_y_scale = _hn * closePercent;
+			draw_sprite_ext(descBackground, 0, ((nameBoxStartX) + _cam_x), ((nameBoxStartY + (nameBoxHeight / 2)) + _cam_y), _wn, _name_y_scale, 0, c_white, 1);
+			
+			if array_length(_inv) > 0 && hoveredItem >= 0 && hoveredItem < array_length(_inv) && _inv[hoveredItem] != -1
+			{
+				var _name = _inv[hoveredItem].name;
+			
+				var _offset_x = nameBoxWidth / 2;
+				var _offset_y = nameBoxHeight / 2;
+			
+				draw_set_halign(fa_center);
+				draw_set_valign(fa_middle);
+			
+				draw_text(((nameBoxStartX + _offset_x) + _cam_x), ((nameBoxStartY + _offset_y) + _cam_y), _name);
 
-			var _current_y = descBoxStartY + (descBoxHeight / 2) - (_current_height / 2); //find the current y (top left, not centered)
+				draw_set_halign(fa_left);
+				draw_set_valign(fa_top);
+			}
 			
-			var _scissor = gpu_get_scissor();
-			
-			gpu_set_scissor(descBoxStartX * _scale_x, _current_y * _scale_y, descBoxWidth * _scale_x, _current_height * _scale_y); //clip the view 
-			//just on the y-axis
-			
-				var _dsw = sprite_get_width(descBackground);
-				var _dsh = sprite_get_height(descBackground);
-				var _wd = descBoxWidth/_dsw;
-				var _hd = descBoxHeight/_dsh;
-				var _y_scale = _hd * closePercent;
-				draw_sprite_ext(descBackground, 0, descBoxStartX, descBoxStartY + (descBoxHeight / 2), _wd, _y_scale, 0, c_white, 1);
-				
-				if array_length(_inv) > 0
-				{
-					var _sep = 6 * inv_scale;//offset from the starting x and y
-					var _desc = _inv[hoveredItem].description;//description text to draw
-				
-					var _t_height = string_height("T")*1.35 //height of the font 
-					var _t_sep = _t_height + (6 * inv_scale);//distance in pixels between lines of text
-				
-					draw_set_font(big_font);
-					draw_text_ext(descBoxStartX + _sep, descBoxStartY + _sep, _desc, _t_height, descBoxWidth - _sep*2);
-				}
-				
-				gpu_set_scissor(_scissor);
-				
-				var _gui_w = display_get_gui_width(); ///get gui to window resolutions
-				var _gui_h = display_get_gui_height();
-				var _win_w = window_get_width();
-				var _win_h = window_get_height();
-
-				var _scale_x = _win_w / _gui_w;
-				var _scale_y = _win_h / _gui_h;
-			
-				var _current_height = nameBoxHeight * closePercent; //get the current height based on the percentage drawn
-
-				var _current_y = nameBoxStartY + (nameBoxHeight / 2) - (_current_height / 2); //find the current y (top left, not centered)
-			
-				gpu_set_scissor(nameBoxStartX * _scale_x, _current_y * _scale_y, nameBoxWidth * _scale_x, _current_height * _scale_y); //clip the view 
-				//just on the y-axis
-			
-				var _wn = nameBoxWidth/_dsw;
-				var _hn	= nameBoxHeight/_dsh;
-				var _y_scale = _hn * closePercent;
-				draw_sprite_ext(descBackground, 0, nameBoxStartX, nameBoxStartY + (nameBoxHeight / 2), _wn, _y_scale, 0, c_white, 1);
-				
-				if array_length(_inv) > 0
-				{
-					var _name = _inv[hoveredItem].name;
-				
-					var _offset_x = nameBoxWidth/2;
-					var _offset_y = nameBoxHeight/2;
-				
-					draw_set_halign(fa_center);
-					draw_set_valign(fa_middle);
-				
-					draw_text(nameBoxStartX + _offset_x, nameBoxStartY + _offset_y + (2 * inv_scale), _name);
-
-					draw_set_halign(fa_left);
-					draw_set_valign(fa_top);
-				}
-				
-				gpu_set_scissor(_scissor);
-		}
+			gpu_set_scissor(_scissor);
+	}
 		
 		var _hsw = sprite_get_width(headerSpr); 
 		var _hsh = sprite_get_height(headerSpr);
@@ -202,30 +199,31 @@ if invShowing
 		var _hw = headerWidth/_hsw;
 		var _hh = headerHeight/_hsh;
 		
-		draw_sprite_ext(headerSpr, 0, headerStartX, headerStartY, _hw, _hh, 0, c_white, 1);
+		draw_sprite_ext(headerSpr, 0, ((headerStartX) + _cam_x), ((headerStartY) + _cam_y), _hw, _hh, 0, c_white, 1);
 		
 		var _sep = headerSep;
 		
 		var _htx = headerStartX + _sep;
 		var _hty = headerStartY + headerHeight/2;
 
-		draw_set_font(big_font);
+		draw_set_font(small_font);
 		draw_set_valign(fa_middle);
-		draw_text(_htx, _hty, inventoryText);
+		draw_text(((_htx) + _cam_x), ((_hty) + _cam_y), inventoryText);
 		draw_set_valign(fa_top);
 		
-		var _c = headerDivLineCol;
 		var _lw = headerDivLineWidth;
-		
-		draw_line_width_colour(headerDivLineX, headerDivLineY + _sep, headerDivLineX, headerDivLineY + headerDivLineLength - _sep, _lw, _c, _c);
+var _slh = sprite_get_height(lineSpr);
+var _slyc = (headerDivLineLength) / _slh; // scale in the y
+
+draw_sprite_ext(lineSpr, 0, headerDivLineX + _cam_x, headerDivLineY + _cam_y, 1, _slyc, 0, c_white, image_alpha);
 		
 		var _ctx = headerDivLineX + _sep + (16 * inv_scale);
 		var _cty = headerStartY + headerHeight/2;
 		var _cat = selectedTab; //current category
 		
-		draw_set_font(big_font);
+		draw_set_font(small_font);
 		draw_set_valign(fa_middle);
-		draw_text(_ctx, _cty, tabText[_cat]);
+		draw_text(((_ctx) + _cam_x), ((_cty) + _cam_y), tabText[_cat]);
 		draw_set_valign(fa_top);
 		
 		var _tab_items_count = 0;
@@ -244,13 +242,13 @@ if invShowing
 		var _asw = sprite_get_width(leftArrowSpr) * inv_scale;
 		var _ash = sprite_get_height(leftArrowSpr) * inv_scale;
 		
-		if point_in_rectangle(_mouse_x, _mouse_y, _ax, _ay, _ax + _asw, _ay + _ash)
+		if point_in_rectangle(_mouse_x, _mouse_y, ((_ax) + _cam_x), ((_ay) + _cam_y), ((_ax + _asw) + _cam_x), ((_ay + _ash) + _cam_y))
 		{
-			_aA = lerp(_aA, 1.1, 0.3);//lerp towards a bigger size
+			_aA = lerp(_aA, 1.02, 0.3);//lerp towards a bigger size
 				
 			if lmButton || rmButton
 			{
-				_aA = 0.9;
+				_aA = 0.98;
 				currentPage--;
 				if currentPage < 0
 				{
@@ -263,7 +261,7 @@ if invShowing
 		
 		var _laSizeMod = _aA;
 		
-		draw_sprite_ext(leftArrowSpr, 0, leftArrowStartX, leftArrowStartY, inv_scale * _laSizeMod, inv_scale * _laSizeMod, 0, c_white, 1);
+		draw_sprite_ext(leftArrowSpr, 0, ((leftArrowStartX) + _cam_x), ((leftArrowStartY) + _cam_y), inv_scale * _laSizeMod, inv_scale * _laSizeMod, 0, c_white, 1);
 		
 		arrowAnims[0] = _aA;
 		
@@ -274,13 +272,13 @@ if invShowing
 		var _asw = sprite_get_width(rightArrowSpr) * inv_scale;
 		var _ash = sprite_get_height(rightArrowSpr) * inv_scale;
 		
-		if point_in_rectangle(_mouse_x, _mouse_y, _ax - _asw, _ay, _ax, _ay + _ash)
+		if point_in_rectangle(_mouse_x, _mouse_y, ((_ax - _asw) + _cam_x), ((_ay) + _cam_y), ((_ax) + _cam_x), ((_ay + _ash) + _cam_y))
 		{
-			_aA = lerp(_aA, 1.1, 0.3);//lerp towards a bigger size
+			_aA = lerp(_aA, 1.02, 0.3);//lerp towards a bigger size
 				
 			if lmButton || rmButton
 			{
-				_aA = 0.9;
+				_aA = 0.98;
 				currentPage++;
 				if currentPage >= currentMaxPage
 				{
@@ -293,7 +291,7 @@ if invShowing
 		
 		var _laSizeMod = _aA;
 		
-		draw_sprite_ext(rightArrowSpr, 0, rightArrowStartX, rightArrowStartY, inv_scale * _laSizeMod, inv_scale * _laSizeMod, 0, c_white, 1);
+		draw_sprite_ext(rightArrowSpr, 0, ((rightArrowStartX) + _cam_x), ((rightArrowStartY) + _cam_y), inv_scale * _laSizeMod, inv_scale * _laSizeMod, 0, c_white, 1);
 		
 		arrowAnims[1] = _aA;
 		
@@ -302,7 +300,7 @@ if invShowing
 		
 		var _text = string(currentPage+1) + " / " + string(currentMaxPage);
 		
-		draw_text(pageNumberTextStartX, pageNumberTextStartY + headerHeight/2, _text);
+		draw_text(((pageNumberTextStartX) + _cam_x), ((pageNumberTextStartY + headerHeight/2) + _cam_y), _text);
 		
 		draw_set_valign(fa_top);
 		draw_set_halign(fa_left);
@@ -321,7 +319,7 @@ if invShowing
 	var _bg_xscale = _sidebar_width / _bg_spr_w;
 	var _bg_yscale = sideBarTotalHeight / _bg_spr_h;
 
-	draw_sprite_ext(spr_sidebar_bg, 0, sideBarStartX, sideBarStartY, _bg_xscale, _bg_yscale, 0, c_white, 1);
+	draw_sprite_ext(spr_sidebar_bg, 0, ((sideBarStartX) + _cam_x), ((sideBarStartY) + _cam_y), _bg_xscale, _bg_yscale, 0, c_white, 1);
 
 	var _available_height = sideBarTotalHeight - (sideBarPad * 2);
 
@@ -334,7 +332,7 @@ if invShowing
 	    var _tx = sideBarStartX;
 	    var _ty = sideBarStartY + i * (_tsh + _sep) + sideBarPad;
 
-	    var _isHover = point_in_rectangle(_mouse_x, _mouse_y, _tx, _ty, _tx + _tsw, _ty + _tsh);
+	    var _isHover = point_in_rectangle(_mouse_x, _mouse_y, ((_tx) + _cam_x), ((_ty) + _cam_y), ((_tx + _tsw) + _cam_x), ((_ty + _tsh) + _cam_y));
 	    var _isSelected = (selectedTab == i);
 
 	    if (_isHover && (lmButton || rmButton)) {
@@ -357,12 +355,12 @@ if invShowing
 	    var _tab_yscale = _tsh / _tab_spr_h;
 
 	    var _tint = _isSelected ? c_white : c_ltgray;
-	    draw_sprite_ext(spr_tab_bg, 0, _draw_x, _ty, _tab_xscale, _tab_yscale, 0, c_white, 1);
+	    draw_sprite_ext(spr_tab_bg, 0, ((_draw_x) + _cam_x), ((_ty) + _cam_y), _tab_xscale, _tab_yscale, 0, c_white, 1);
 
 	    var _icon_x = _draw_x + (_tsw / 2);
 	    var _icon_y = _ty + (_tsh / 2);
     
-	    draw_sprite_ext(spr_category_icons, i, _icon_x, _icon_y, inv_scale, inv_scale, 0, c_white, 1);
+	    draw_sprite_ext(spr_category_icons, i, ((_icon_x) + _cam_x), ((_icon_y) + _cam_y), inv_scale, inv_scale, 0, c_white, 1);
 	}
 	
 	var _xsw = sprite_get_width(closeSpr) * inv_scale;
@@ -370,9 +368,9 @@ if invShowing
 	var _xxx = closeStartX + _xsw/2;
 	var _xyy = closeStartY + _xsh/2;
 	
-	if point_in_rectangle(_mouse_x, _mouse_y, _xxx - _xsw/2, _xyy - _xsh/2, _xxx + _xsw/2, _xyy + _xsh/2)
+	if point_in_rectangle(_mouse_x, _mouse_y, ((_xxx - _xsw/2) + _cam_x), ((_xyy - _xsh/2) + _cam_y), ((_xxx + _xsw/2) + _cam_x), ((_xyy + _xsh/2) + _cam_y))
 	{
-		closeAnim = lerp(closeAnim, 1.1, 0.3);//lerp towards a bigger size
+		closeAnim = lerp(closeAnim, 1.02, 0.3);//lerp towards a bigger size
 				
 		if lmButton || rmButton
 		{
@@ -383,9 +381,8 @@ if invShowing
 		closeAnim = lerp(closeAnim, 1, 0.5);//lerp towards 1, meaning no size change
 	}
 	
-	draw_sprite_ext(closeSpr, 0, _xxx, _xyy, inv_scale * closeAnim, inv_scale * closeAnim, 0, c_white, 1);
+	draw_sprite_ext(closeSpr, 0, ((_xxx) + _cam_x), ((_xyy) + _cam_y), inv_scale * closeAnim, inv_scale * closeAnim, 0, c_white, 1);
 }
-
 var _os = otherShowing;
 if _os != noone
 {
@@ -393,8 +390,8 @@ if _os != noone
 	
 	var _inv = _os.inv; //the inventory
 	
-	var _mouse_x = device_mouse_x_to_gui(0); //get the mouse x pos
-	var _mouse_y = device_mouse_y_to_gui(0); //the y pos
+	var _mouse_x = device_mouse_x(0); //get the mouse x pos
+	var _mouse_y = device_mouse_y(0); //the y pos
 	
 	var _extended_inner_width = innerWidth + (32 * inv_scale);
 	
@@ -404,7 +401,7 @@ if _os != noone
 	var _xs = _extended_inner_width / _sw;
 	var _ys = innerHeight / _sh;
 	
-	draw_sprite_ext(spr_inv_background, 0, innerStartX, innerStartY, _xs, _ys, 0, c_white, 1);
+	draw_sprite_ext(spr_inv_background, 0, ((innerStartX) + _cam_x), ((innerStartY) + _cam_y), _xs, _ys, 0, c_white, 1);
 	
 	var _inv_length = array_length(_inv);
 	
@@ -438,7 +435,7 @@ if _os != noone
 			var _isHover = false; //whether or not we are hovering a slot
 			var _iA = _os.invAnims[i];
 			
-			if point_in_rectangle(_mouse_x, _mouse_y, _xx, _yy, _xx + _target_slot_width, _yy + _slot_sh)
+			if point_in_rectangle(_mouse_x, _mouse_y, ((_xx) + _cam_x), ((_yy) + _cam_y), ((_xx + _target_slot_width) + _cam_x), ((_yy + _slot_sh) + _cam_y))
 			{
 				_isHover = true;//we are hovering
 			}
@@ -459,9 +456,11 @@ if _os != noone
 					var _item = _inv[i];
 					if buyMultipleKey 
 					{
-						global.coins -= _inv[i].cost * min(_inv[i].amount, 5);
-						inventory_remove_other(i, _inv, 5);
-						inventory_add(_item, 5);
+						var _amountToBuy = min(_inv[i].amount, 5);
+        
+				        global.coins -= _inv[i].cost * _amountToBuy;
+				        inventory_remove_other(i, _inv, _amountToBuy);
+				        inventory_add(_item, _amountToBuy);
 					} else {
 						inventory_remove_other(i, _inv);
 						inventory_add(_item);
@@ -479,22 +478,22 @@ if _os != noone
 			var _slot_cx = _xx + _target_slot_width / 2;
 			var _slot_cy = _yy + _slot_sh / 2;
 			
-			draw_sprite_ext(slot, 0, _slot_cx, _slot_cy, _slot_xscale * _sizeMod, _slot_yscale * _sizeMod, 0, _c, 1);
+			draw_sprite_ext(slot, 0, ((_slot_cx) + _cam_x), ((_slot_cy) + _cam_y), _slot_xscale * _sizeMod, _slot_yscale * _sizeMod, 0, _c, 1);
 			
 			var _item_spr = _inv[i].icon;
 			
 			var _ixx = _start_x + (sep * 2);
 			var _iyy = _yy + _slot_sh / 2;
 			
-			draw_sprite_ext(_item_spr, 0, _ixx, _iyy, inv_scale, inv_scale, 0, _c, 1);
+			draw_sprite_ext(_item_spr, 0, ((_ixx) + _cam_x), ((_iyy) + _cam_y), inv_scale, inv_scale, 0, _c, 1);
 			
 			var _cost = _inv[i].cost;
 			
 			var _cxx = _ixx + (_sw * inv_scale) + (10 * inv_scale);
 			var _cyy = _iyy;
 			draw_set_valign(fa_middle);
-			var _cost_text = "$" + string(_cost);
-			draw_text(_cxx, _cyy, _cost_text);
+			var _cost_text = string(_cost) + "g";
+			draw_text(((_cxx) + _cam_x), ((_cyy) + _cam_y), _cost_text);
 
 			var _item = _inv[i];
 			var _amt = get_item_amount(_item, global.inventory);
@@ -503,7 +502,7 @@ if _os != noone
 			
 			var _amt_text = "Inventory: x" + string(_amt);
 			
-			draw_text(_xx + innerWidth - (32 * inv_scale) - string_width(_amt_text), _cyy, _amt_text);
+			draw_text(((_xx + innerWidth - (32 * inv_scale) - string_width(_amt_text)) + _cam_x), ((_cyy) + _cam_y), _amt_text);
 			
 			draw_set_valign(fa_top);
 			
@@ -515,11 +514,11 @@ if _os != noone
 			
 			if _quantity > 1//only if more than 1
 			{
-				draw_set_font(big_font);
-				draw_set_colour(c_red);
+				draw_set_font(small_font);
+				draw_set_colour(c_white);
 				draw_set_halign(fa_center);//set alignment
 				draw_set_valign(fa_middle);
-				draw_text(_qxx, _qyy, "x" + string(_quantity));//draw q-text
+				draw_text(((_qxx) + _cam_x), ((_qyy) + _cam_y), "x" + string(_quantity));//draw q-text
 				draw_set_halign(fa_left);
 				draw_set_valign(fa_top);//reset
 				draw_set_colour(c_white);
@@ -535,22 +534,17 @@ if _os != noone
 	var _hw = headerWidth / _hsw;
 	var _hh = headerHeight / _hsh;
 	
-	draw_sprite_ext(headerSpr, 0, headerStartX, headerStartY, _hw, _hh, 0, c_white, 1);
+	draw_sprite_ext(headerSpr, 0, ((headerStartX) + _cam_x), ((headerStartY) + _cam_y), _hw, _hh, 0, c_white, 1);
 	
 	var _hdr_sep = headerSep;
 	
 	var _htx = headerStartX + _hdr_sep;
 	var _hty = headerStartY + headerHeight / 2;
 
-	draw_set_font(big_font);
+	draw_set_font(small_font);
 	draw_set_valign(fa_middle);
-	draw_text(_htx, _hty, shopText);
+	draw_text(((_htx) + _cam_x), ((_hty) + _cam_y), shopText);
 	draw_set_valign(fa_top);
-	
-	var _c = headerDivLineCol;
-	var _lw = headerDivLineWidth;
-	
-	draw_line_width_colour(headerDivLineX, headerDivLineY + _hdr_sep, headerDivLineX, headerDivLineY + headerDivLineLength - _hdr_sep, _lw, _c, _c);
 	
 	if (descBufferTimer > 0) {
 		closeTarget = 1;
@@ -565,28 +559,30 @@ if _os != noone
 	}
 	
 	if (closePercent > 0) {
-		var _gui_w = display_get_gui_width(); ///get gui to window resolutions
-		var _gui_h = display_get_gui_height();
-		var _win_w = window_get_width();
-		var _win_h = window_get_height();
-
-		var _scale_x = _win_w / _gui_w;
-		var _scale_y = _win_h / _gui_h;
 		
-		var _current_height = descBoxHeight * closePercent; //get the current height based on the percentage drawn
+	var view_w = camera_get_view_width(view_camera[0]);
+	var view_h = camera_get_view_height(view_camera[0]);
+	var gui_scale_x = window_get_width() / view_w;
+	var gui_scale_y = window_get_height() / view_h; //IMPORTANT --- we need to get the scale factor between window res and gui res
+		
+		var _current_height = descBoxHeight * 1.5 * closePercent; //get the current height based on the percentage drawn
 
 		var _current_y = descBoxStartY + (descBoxHeight / 2) - (_current_height / 2); //find the current y
 		
 		var _scissor = gpu_get_scissor();
 		
-		gpu_set_scissor(descBoxStartX * _scale_x, _current_y * _scale_y, descBoxWidth * _scale_x, _current_height * _scale_y); //clip the view
+		gpu_set_scissor(
+		(descBoxStartX) * gui_scale_x, 
+		(_current_y) * gui_scale_y,
+		descBoxWidth * gui_scale_x, 
+		_current_height * gui_scale_y); //clip the view
 		
 			var _dsw = sprite_get_width(descBackground);
 			var _dsh = sprite_get_height(descBackground);
 			var _wd = descBoxWidth / _dsw;
 			var _hd = descBoxHeight / _dsh;
 			var _y_scale = _hd * closePercent;
-			draw_sprite_ext(descBackground, 0, descBoxStartX, descBoxStartY + (descBoxHeight / 2), _wd, _y_scale, 0, c_white, 1);
+			draw_sprite_ext(descBackground, 0, ((descBoxStartX) + _cam_x), ((descBoxStartY + (descBoxHeight / 2)) + _cam_y), _wd, _y_scale, 0, c_white, 1);
 			
 			if array_length(_inv) > 0 && hoveredItem >= 0 && hoveredItem < array_length(_inv) && _inv[hoveredItem] != -1
 			{
@@ -595,21 +591,25 @@ if _os != noone
 			
 				var _t_height = string_height("T") * 1.35 //height of the font
 			
-				draw_set_font(big_font);
-				draw_text_ext(descBoxStartX + _sep_text, descBoxStartY + _sep_text, _desc, _t_height, descBoxWidth - _sep_text * 2);
+				draw_set_font(small_font);
+				draw_text_ext(((descBoxStartX + _sep_text) + _cam_x), ((descBoxStartY + _sep_text) + _cam_y), _desc, _t_height, descBoxWidth - _sep_text * 2);
 			}
 			
 			gpu_set_scissor(_scissor);
 			
-			var _current_name_height = nameBoxHeight * closePercent; 
+			var _current_name_height = nameBoxHeight * 1.5 * closePercent; 
 			var _current_name_y = nameBoxStartY + (nameBoxHeight / 2) - (_current_name_height / 2); 
 		
-			gpu_set_scissor(nameBoxStartX * _scale_x, _current_name_y * _scale_y, nameBoxWidth * _scale_x, _current_name_height * _scale_y); 
+			gpu_set_scissor(
+			(nameBoxStartX) * gui_scale_x, 
+			(_current_name_y) * gui_scale_y, 
+			nameBoxWidth * gui_scale_x, 
+			_current_name_height * gui_scale_y); 
 		
 			var _wn = nameBoxWidth / _dsw;
 			var _hn = nameBoxHeight / _dsh;
 			var _name_y_scale = _hn * closePercent;
-			draw_sprite_ext(descBackground, 0, nameBoxStartX, nameBoxStartY + (nameBoxHeight / 2), _wn, _name_y_scale, 0, c_white, 1);
+			draw_sprite_ext(descBackground, 0, ((nameBoxStartX) + _cam_x), ((nameBoxStartY + (nameBoxHeight / 2)) + _cam_y), _wn, _name_y_scale, 0, c_white, 1);
 			
 			if array_length(_inv) > 0 && hoveredItem >= 0 && hoveredItem < array_length(_inv) && _inv[hoveredItem] != -1
 			{
@@ -621,7 +621,7 @@ if _os != noone
 				draw_set_halign(fa_center);
 				draw_set_valign(fa_middle);
 			
-				draw_text(nameBoxStartX + _offset_x, nameBoxStartY + _offset_y + (2 * inv_scale), _name);
+				draw_text(((nameBoxStartX + _offset_x) + _cam_x), ((nameBoxStartY + _offset_y) + _cam_y), _name);
 
 				draw_set_halign(fa_left);
 				draw_set_valign(fa_top);
@@ -640,13 +640,13 @@ if _os != noone
 	var _asw = sprite_get_width(leftArrowSpr) * inv_scale;
 	var _ash = sprite_get_height(leftArrowSpr) * inv_scale;
 	
-	if point_in_rectangle(_mouse_x, _mouse_y, _ax, _ay, _ax + _asw, _ay + _ash)
+	if point_in_rectangle(_mouse_x, _mouse_y, ((_ax) + _cam_x), ((_ay) + _cam_y), ((_ax + _asw) + _cam_x), ((_ay + _ash) + _cam_y))
 	{
-		_aA = lerp(_aA, 1.1, 0.3);//lerp towards a bigger size
+		_aA = lerp(_aA, 1.02, 0.3);//lerp towards a bigger size
 			
 		if lmButton || rmButton
 		{
-			_aA = 0.9;
+			_aA = 0.98;
 			_os.currentPage--;
 			if _os.currentPage < 0
 			{
@@ -657,7 +657,7 @@ if _os != noone
 		_aA = lerp(_aA, 1, 0.5);//lerp towards 1, meaning no size change
 	}
 	
-	draw_sprite_ext(leftArrowSpr, 0, leftArrowStartX, leftArrowStartY, inv_scale * _aA, inv_scale * _aA, 0, c_white, 1);
+	draw_sprite_ext(leftArrowSpr, 0, ((leftArrowStartX) + _cam_x), ((leftArrowStartY) + _cam_y), inv_scale * _aA, inv_scale * _aA, 0, c_white, 1);
 	
 	arrowAnims[0] = _aA;
 	
@@ -668,13 +668,13 @@ if _os != noone
 	var _asw = sprite_get_width(rightArrowSpr) * inv_scale;
 	var _ash = sprite_get_height(rightArrowSpr) * inv_scale;
 	
-	if point_in_rectangle(_mouse_x, _mouse_y, _ax - _asw, _ay, _ax, _ay + _ash)
+	if point_in_rectangle(_mouse_x, _mouse_y, ((_ax - _asw) + _cam_x), ((_ay) + _cam_y), ((_ax) + _cam_x), ((_ay + _ash) + _cam_y))
 	{
-		_aA = lerp(_aA, 1.1, 0.3);//lerp towards a bigger size
+		_aA = lerp(_aA, 1.02, 0.3);//lerp towards a bigger size
 			
 		if lmButton || rmButton
 		{
-			_aA = 0.9;
+			_aA = 0.98;
 			_os.currentPage++;
 			if _os.currentPage >= _os.currentMaxPage
 			{
@@ -685,7 +685,7 @@ if _os != noone
 		_aA = lerp(_aA, 1, 0.5);//lerp towards 1, meaning no size change
 	}
 	
-	draw_sprite_ext(rightArrowSpr, 0, rightArrowStartX, rightArrowStartY, inv_scale * _aA, inv_scale * _aA, 0, c_white, 1);
+	draw_sprite_ext(rightArrowSpr, 0, ((rightArrowStartX) + _cam_x), ((rightArrowStartY) + _cam_y), inv_scale * _aA, inv_scale * _aA, 0, c_white, 1);
 	
 	arrowAnims[1] = _aA;
 	
@@ -694,7 +694,7 @@ if _os != noone
 	
 	var _text = string(_os.currentPage + 1) + " / " + string(_os.currentMaxPage);
 	
-	draw_text(pageNumberTextStartX, pageNumberTextStartY + headerHeight/2, _text);
+	draw_text(((pageNumberTextStartX) + _cam_x), ((pageNumberTextStartY + headerHeight/2) + _cam_y), _text);
 	
 	draw_set_valign(fa_top);
 	draw_set_halign(fa_left);
@@ -704,9 +704,9 @@ if _os != noone
 	var _xxx = closeStartX + _xsw/2;
 	var _xyy = closeStartY + _xsh/2;
 	
-	if point_in_rectangle(_mouse_x, _mouse_y, _xxx - _xsw/2, _xyy - _xsh/2, _xxx + _xsw/2, _xyy + _xsh/2)
+	if point_in_rectangle(_mouse_x, _mouse_y, ((_xxx - _xsw/2) + _cam_x), ((_xyy - _xsh/2) + _cam_y), ((_xxx + _xsw/2) + _cam_x), ((_xyy + _xsh/2) + _cam_y))
 	{
-		closeAnim = lerp(closeAnim, 1.1, 0.3);//lerp towards a bigger size
+		closeAnim = lerp(closeAnim, 1.02, 0.3);//lerp towards a bigger size
 				
 		if lmButton || rmButton
 		{
@@ -718,5 +718,5 @@ if _os != noone
 		closeAnim = lerp(closeAnim, 1, 0.5);//lerp towards 1, meaning no size change
 	}
 	
-	draw_sprite_ext(closeSpr, 0, _xxx, _xyy, inv_scale * closeAnim, inv_scale * closeAnim, 0, c_white, 1);
+	draw_sprite_ext(closeSpr, 0, ((_xxx) + _cam_x), ((_xyy) + _cam_y), inv_scale * closeAnim, inv_scale * closeAnim, 0, c_white, 1);
 }

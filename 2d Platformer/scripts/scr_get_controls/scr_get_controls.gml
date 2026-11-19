@@ -52,6 +52,7 @@ function scr_get_controls()
 		global.key_accept_interact = vk_space;
 		global.key_map = ord("M");
 		global.key_inv = ord("I");
+		global.key_menu = 189;
 		global.key_buy_multiple = vk_shift;
 		
 		load_controls();
@@ -119,6 +120,8 @@ function scr_get_controls()
 	mapKey = check_input_pressed(global.key_map)// || gamepad_button_check_pressed(0, gp_select);
 	
 	invKey = check_input_pressed(global.key_inv)// || gamepad_button_check_pressed(0, gp_face1);
+	
+	menuKey = check_input_pressed(global.key_menu);
 	
 	buyMultipleKey = check_input(global.key_buy_multiple)// || gamepad_button_check_pressed(0, gp_face3);
 	

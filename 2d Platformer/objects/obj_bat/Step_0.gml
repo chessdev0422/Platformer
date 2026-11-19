@@ -1,3 +1,5 @@
+if global.paused exit;
+
 //basic movement to test
 /*if instance_exists(obj_player)
 {

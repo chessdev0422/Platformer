@@ -1,17 +1,21 @@
 if instance_exists(obj_player)
 {
-	
 	if instance_exists(obj_warp) {exit;}
 	if global.paused { draw_set_alpha(0.5);}
 	
-	var _mouse_x = device_mouse_x_to_gui(0);//get mouse for later use
-	var _mouse_y = device_mouse_y_to_gui(0);
+	var _mouse_x = mouse_x;
+	var _mouse_y = mouse_y;
 	
 	var _hud_scale = hud_scale; 
 	
+	var _cam_x = camera_get_view_x(view_camera[0]);
+	var _cam_y = camera_get_view_y(view_camera[0]);
+	var _cam_w = camera_get_view_width(view_camera[0]);
+	var _cam_h = camera_get_view_height(view_camera[0]);
+	
 	var _columns = 8; //how many hearts fit in a single row before wrapping
-	var _start_x = 32 * _hud_scale; //the starting x pos
-	var _start_y = 32 * _hud_scale;//starting y pos
+	var _start_x = _cam_x + (32 * _hud_scale); //the starting x pos
+	var _start_y = _cam_y + (32 * _hud_scale);//starting y pos
 	
 	var _hp = obj_player.hp;//player hp
 	
@@ -37,7 +41,7 @@ if instance_exists(obj_player)
 		var _health_img = clamp(_heart_hp, 0, 4); //clamp it
 		
 		//draw the heart
-		draw_sprite_ext(_spr, _health_img, _xx, _yy, _hud_scale, _hud_scale, 0, c_white, 1);
+		draw_sprite(_spr, _health_img, _xx, _yy);
 		
 		var _next_x = _start_x + (i+1 mod _columns) * _sep_x;
 		if i == (_total_hearts - 1) || _xx > _next_x 
@@ -47,7 +51,7 @@ if instance_exists(obj_player)
 	}
 
 	//draw the coin text
-	draw_text(32 * _hud_scale, 64 * _hud_scale, "Coins: " + string(global.coins));
+	draw_text(_cam_x + (32 * _hud_scale), _cam_y + (64 * _hud_scale), "Coins: " + string(global.coins));
 	
 	if (_hp <= 2) {
    
@@ -55,29 +59,29 @@ if instance_exists(obj_player)
 	    
 	    var max_alpha = 0.225 + sin(pulse_timer) * 0.125;
     
-	    var w = display_get_gui_width();
-	    var h = display_get_gui_height();
+	    var w = _cam_w;
+	    var h = _cam_h;
 	    var edge_thickness = 80 * _hud_scale; //thickness of the border scaled for 180p
     
 	    draw_primitive_begin(pr_trianglestrip);
     
 	    //top
-	    draw_vertex_color(0, 0, c_red, max_alpha);
-	    draw_vertex_color(edge_thickness, edge_thickness, c_red, 0);
-	    draw_vertex_color(w, 0, c_red, max_alpha);
-	    draw_vertex_color(w - edge_thickness, edge_thickness, c_red, 0);
+	    draw_vertex_color(_cam_x, _cam_y, c_red, max_alpha);
+	    draw_vertex_color(_cam_x + edge_thickness, _cam_y + edge_thickness, c_red, 0);
+	    draw_vertex_color(_cam_x + w, _cam_y, c_red, max_alpha);
+	    draw_vertex_color(_cam_x + w - edge_thickness, _cam_y + edge_thickness, c_red, 0);
     
 	    //right
-	    draw_vertex_color(w, h, c_red, max_alpha);
-	    draw_vertex_color(w - edge_thickness, h - edge_thickness, c_red, 0);
+	    draw_vertex_color(_cam_x + w, _cam_y + h, c_red, max_alpha);
+	    draw_vertex_color(_cam_x + w - edge_thickness, _cam_y + h - edge_thickness, c_red, 0);
     
 	    //bottom
-	    draw_vertex_color(0, h, c_red, max_alpha);
-	    draw_vertex_color(edge_thickness, h - edge_thickness, c_red, 0);
+	    draw_vertex_color(_cam_x, _cam_y + h, c_red, max_alpha);
+	    draw_vertex_color(_cam_x + edge_thickness, _cam_y + h - edge_thickness, c_red, 0);
     
 		//left
-	    draw_vertex_color(0, 0, c_red, max_alpha);
-	    draw_vertex_color(edge_thickness, edge_thickness, c_red, 0);
+	    draw_vertex_color(_cam_x, _cam_y, c_red, max_alpha);
+	    draw_vertex_color(_cam_x + edge_thickness, _cam_y + edge_thickness, c_red, 0);
     
 	    draw_primitive_end();
 	}

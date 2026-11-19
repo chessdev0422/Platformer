@@ -1,5 +1,5 @@
 var _i = obj_inventory_manager;
-if interacting && (!_i.invShowing || instance_exists(obj_textbox) || obj_map.mapShowing)
+if interacting && (!global.paused || (global.paused && _i.otherShowing != noone))
 {
 	if _i.otherShowing == noone
 	{

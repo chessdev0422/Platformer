@@ -1,5 +1,7 @@
 scr_controls_setup();
 
+depth = -100;
+
 global.inventory = []; //the inventory array
 
 enum items { //an enum for item ids
@@ -43,8 +45,7 @@ otherShowing = noone;
 invShowing = false;//whether or not the inventory is showing
 
 
-//note: scale just like other guis
-inv_scale = 0.5; 
+inv_scale = 1; //draw scale (if in gui 0.5)
 
 invSlotsWidth = 5;//the total number of slots before wrapping, i.e. number of columns
 
@@ -176,12 +177,12 @@ headerHeight = 32 * inv_scale; //height
 
 headerSpr = spr_inv_header;
 
-headerDivLineX = 224 * inv_scale;
+headerDivLineX = 208 * inv_scale;
 headerDivLineY = headerStartY;
 headerDivLineLength = headerHeight;
-headerDivLineCol = c_yellow; //color
 headerDivLineWidth = 5 * inv_scale; //line width
 headerSep = 4 * inv_scale; //separation between elements
+lineSpr = spr_header_div_line;
 
 inventoryText = "Inventory";//the header text to draw
 tabText = ["Resources", "Consumables", "Trinkets", "Trash"];//category text

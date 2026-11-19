@@ -1,10 +1,7 @@
-scr_controls_setup();
-
-
 mapShowing = false;//whether or not the map is pulled up
 
 //note: everything is designed for 360p, hence the map scale to halve it to 180p and fit the gui resolution
-map_scale = 0.5; // Scale factor to make the map draw at 1/2 size (180p scale relative to 360p)
+map_scale = 1;
 
 map_x = 128; //the top left x position of the map corner
 map_y = 96; //the top left y position of the map corner
@@ -37,3 +34,5 @@ closeSpr = spr_close_ui;
 closeStartX = map_x + map_width + (32 * map_scale);
 closeStartY = map_y;
 closeAnim = 1;
+
+depth = -100;

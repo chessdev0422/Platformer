@@ -7,7 +7,7 @@ mask_index = maskSpr;
 var _damaged = iframeTimer > 0; //if we were just damaged, we are unable to jump, attack, dash, etc
 
 //reset the jump before and after running interact code
-if (instance_exists(obj_textbox) || obj_inventory_manager.invShowing || obj_map.mapShowing || obj_inventory_manager.otherShowing)
+if global.paused
 {
     jumpKeyPressed = false;
     jumpKeyBuffered = false;
@@ -31,7 +31,7 @@ if keyboard_check_pressed(ord("V"))
 
 
 //interacting, run before everything else
-if onGround && interactKey && (!instance_exists(obj_textbox) && !obj_inventory_manager.invShowing && !obj_map.mapShowing)
+if onGround && interactKey && (!global.dialogue && !obj_inventory_manager.invShowing && !obj_map.mapShowing)
 {
 	var _check_x = lengthdir_x(last_face, interactDist);
 	
@@ -55,7 +55,7 @@ if onGround && interactKey && (!instance_exists(obj_textbox) && !obj_inventory_m
 	}
 }
 
-if (instance_exists(obj_textbox) || obj_inventory_manager.invShowing || obj_map.mapShowing || interactInst != noone)
+if global.paused
 {
     jumpKeyPressed = false;
     jumpKeyBuffered = false;
@@ -65,7 +65,7 @@ if (instance_exists(obj_textbox) || obj_inventory_manager.invShowing || obj_map.
 }
 
 
-if instance_exists(obj_textbox)
+if global.dialogue
 {
 	global.paused = true;
 }

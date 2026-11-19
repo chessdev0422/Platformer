@@ -28,5 +28,6 @@ function scr_create_textbox(_text_id)
 	with (instance_create_depth(x, y, 0, obj_textbox))
 	{
 		scr_gametext(_text_id);
+		global.dialogue = true;
 	}
 }

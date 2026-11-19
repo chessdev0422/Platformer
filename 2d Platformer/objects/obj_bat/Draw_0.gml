@@ -12,5 +12,5 @@ if keyboard_check(ord("G"))
 
 shader_reset();
 
-draw_set_font(big_font);
+draw_set_font(small_font);
 draw_text(x, y + 20, hp);

@@ -1,5 +1,3 @@
-if global.paused exit; 
-
 scr_get_controls();
 
 if !instance_exists(follow) { exit; };	
@@ -11,6 +9,8 @@ var _target_look_ahead = follow.last_face * 48;
 
 var _camWidth = camera_get_view_width(view_camera[0]);
 var _camHeight = camera_get_view_height(view_camera[0]);
+
+if global.dialogue {_target_look_ahead = 0};
 
 look_ahead = lerp(look_ahead, _target_look_ahead, 0.2);
 
